@@ -114,7 +114,89 @@ Loop:
 	{
 		//Nhan check value xem client co tiep tuc hay khong
 		mysock.Receive(&continueCheck, sizeof(continueCheck), 0);
-	} while (continueCheck);
+		bool status = true; // Tinh trang kha thi cua hoat dong
+		if (continueCheck == upload) {
+			mysock.Send(&status, sizeof(status), 0);
+			if (status == true) {
+				char fileName[100];
+				char path[100] = "Database/";
+				int length = 0;
+				
+				// tao path "Database/fileName"
+				mysock.Receive(&length, sizeof(length), 0);
+				mysock.Receive(fileName, length, 0);
+				fileName[length] = '\0';
+				strcat_s(path, fileName);
+				
+				// fstream cua file duoc upload
+				fstream output;
+				output.open(path, ios::out | ios::binary);
+				int buffLength = 0; // do dai doan bin moi lan gui
+				
+				while (true) {
+					mysock.Receive(&buffLength, sizeof(buffLength), 0);
+					if (buffLength == 0) break;
+					else {
+						char* buff = new char[buffLength];
+						mysock.Receive(buff, buffLength, 0);
+						output.write(buff, buffLength);
+						delete[] buff;
+					}	
+				}
+				output.close();
+				cout << "File "  << fileName << " da duoc upload len Database.\n";
+			}
+		}
+		else if (continueCheck == download) {
+			mysock.Send(&status, sizeof(status), 0);
+			if (status == true) {
+				DIR* pDIR;
+				struct dirent* entry;
+				if (pDIR = opendir(databasePath)) {
+					while (entry = readdir(pDIR)) {
+						if (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0) {
+							mysock.Send(&(entry->d_namlen), sizeof(int), 0);
+							mysock.Send(&(entry->d_name), entry->d_namlen, 0);
+						}
+					}
+					int zero = 0; // thoat vong lap ben phia client
+					mysock.Send(&zero, sizeof(zero), 0);
+					closedir(pDIR);
+				}
+			}
+	
+			char path[100] = "Database/";
+			char fileName[100];
+			int nameLength = 0;
+			mysock.Receive(&nameLength, sizeof(nameLength), 0);
+			mysock.Receive(fileName, nameLength, 0);
+			fileName[nameLength] = '\0';
+			strcat_s(path, fileName);
+			cout << "Client muon download file: " << fileName << endl;
+			
+			fstream download;
+			download.open(path, ios::in | ios::binary);
+			if (download.good()) {
+				int size = 1024 * 1024;
+				char* buff = new char[size];
+				int buffLength = 0;
+				while (!download.eof()) {
+					download.read((char*)buff, size);
+					buffLength = download.gcount();
+					buff[buffLength] = '\0';
+					mysock.Send(&buffLength, sizeof(buffLength), 0);
+					mysock.Send(buff, buffLength, 0);
+				}
+				delete[] buff;
+				buffLength = 0;
+				mysock.Send(&buffLength, sizeof(buffLength), 0);
+				cout << "\nDa chuyen file " << fileName << " sang client.\n";
+			}
+			else {
+				cout << "Khong ton tai ten file.\n";
+			}
+		}
+	} while (continueCheck);	
 	cout << User << " da dang xuat" << endl;
 	delete hConnected;
 	return 0;
