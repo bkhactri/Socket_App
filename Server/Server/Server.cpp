@@ -144,7 +144,7 @@ Loop:
 					}	
 				}
 				output.close();
-				cout << "File "  << fileName << " da duoc upload len Database.\n";
+				cout << "File " << fileName << " da duoc " << User << " upload len Database.\n";
 			}
 		}
 		else if (continueCheck == download) {
@@ -172,7 +172,6 @@ Loop:
 			mysock.Receive(fileName, nameLength, 0);
 			fileName[nameLength] = '\0';
 			strcat_s(path, fileName);
-			cout << "Client muon download file: " << fileName << endl;
 			
 			fstream download;
 			download.open(path, ios::in | ios::binary);
@@ -190,7 +189,7 @@ Loop:
 				delete[] buff;
 				buffLength = 0;
 				mysock.Send(&buffLength, sizeof(buffLength), 0);
-				cout << "\nDa chuyen file " << fileName << " sang client.\n";
+				cout << User << " da tai file " << fileName << endl;
 			}
 			else {
 				cout << "Khong ton tai ten file.\n";

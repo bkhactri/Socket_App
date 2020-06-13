@@ -121,9 +121,9 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 			Continue:
 				do
 				{
-					cout << "\n1/ Upload file len server\n";
-					cout << "2/ Download file tu server\n";
-					cout << "0/ Thoat\n";
+					cout << "\n1.Upload file len server\n";
+					cout << "2.Download file tu server\n";
+					cout << "0.Thoat\n";
 					cout << "Choice: ";
 					cin >> continueCheck;
 					client.Send(&continueCheck, sizeof(continueCheck), 0);

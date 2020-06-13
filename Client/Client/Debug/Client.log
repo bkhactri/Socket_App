@@ -1,3 +1,0 @@
-﻿  Client.cpp
-C:\Users\Admin\source\repos\Project2\Client\Client\Client.cpp(150,36): warning C4244: '=': conversion from 'std::streamsize' to 'int', possible loss of data
-  Client.vcxproj -> C:\Users\Admin\source\repos\Project2\Debug\Client.exe
