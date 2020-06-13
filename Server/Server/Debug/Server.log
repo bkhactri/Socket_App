@@ -1,5 +1,0 @@
-﻿  Server.cpp
-C:\Users\Admin\source\repos\Project2\Server\Server\Server.cpp(185,34): warning C4244: '=': conversion from 'std::streamsize' to 'int', possible loss of data
-C:\Users\Admin\source\repos\Project2\Server\Server\Server.cpp(65,6): warning C4101: 'size': unreferenced local variable
-C:\Users\Admin\source\repos\Project2\Server\Server\Server.cpp(223,8): warning C4101: 'i': unreferenced local variable
-  Server.vcxproj -> C:\Users\Admin\source\repos\Project2\Debug\Server.exe
