@@ -121,11 +121,86 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 			Continue:
 				do
 				{
-					cout << "Nhap 1 de tiep tuc, 0 de thoat: ";
+					cout << "\n1/ Upload file len server\n";
+					cout << "2/ Download file tu server\n";
+					cout << "0/ Thoat\n";
+					cout << "Choice: ";
 					cin >> continueCheck;
 					client.Send(&continueCheck, sizeof(continueCheck), 0);
+					bool status = false;
+					client.Receive(&status, sizeof(int), 0);
+					if (status == true) {
+						if (continueCheck == upload) {
+							cout << "\nNhap ten file muon upload: ";
+							char fileName[100];
+							cin.ignore();
+							cin.getline(fileName, 100);
+							int length = strlen(fileName);
+							fileName[length] = '\0';
+							fstream upload;
+							upload.open(fileName, ios::in | ios::binary);
+							if (upload.good()) {
+								client.Send(&length, sizeof(length), 0);
+								client.Send(fileName, length, 0);
+								int size = 1024 * 1024;
+								char* buff = new char[size];
+								int buffLength = 0;
+								while (!upload.eof()) {
+									upload.read((char*)buff, size);
+									buffLength = upload.gcount();
+									buff[length] = '\0';
+									client.Send(&buffLength, sizeof(buffLength), 0);
+									client.Send(buff, buffLength, 0);
+								}
+								delete[] buff;
+								buffLength = 0;
+								client.Send(&buffLength, sizeof(buffLength), 0);
+							}
+							else {
+								cout << "\nKhong ton tai ten file.\n";
+							}
+							upload.close();
+						}
+						else if (continueCheck == download) {
+							cout << "\nDanh sach file ton tai tren database cua server:\n";
+							char fileName[100];
+							int nameLength = 0;
+							while (true) {
+								client.Receive(&nameLength, sizeof(nameLength), 0);
+								if (nameLength == 0) break;
+								else {
+									client.Receive(fileName, nameLength, 0);
+									fileName[nameLength] = '\0';
+									cout << fileName << endl;
+								}
+							}
+							cout << "Nhap ten file muon download: ";
+							cin.ignore();
+							cin.getline(fileName, 100);
+							nameLength = strlen(fileName);
+							fileName[nameLength] = '\0';
+							client.Send(&nameLength, sizeof(nameLength), 0);
+							client.Send(fileName, nameLength, 0);
 
-				} while (continueCheck);
+							fstream output;
+							output.open(fileName, ios::out | ios::binary);
+							int buffLength = 0; // do dai doan bin moi lan gui
+
+							while (true) {
+								client.Receive(&buffLength, sizeof(buffLength), 0);
+								if (buffLength == 0) break;
+								else {
+									char* buff = new char[buffLength];
+									client.Receive(buff, buffLength, 0);
+									output.write(buff, buffLength);
+									delete[] buff;
+								}
+							}
+							output.close();
+							cout << "\nDa download file thanh cong.\n";
+						}
+					}
+				} while (continueCheck != 0);
 				// Dong ket noi
 				client.Close();
 			}
