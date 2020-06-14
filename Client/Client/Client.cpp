@@ -16,6 +16,24 @@ CWinApp theApp;
 
 using namespace std;
 
+char sAdd[1000];
+unsigned int port = 1234; //Cung port voi server
+
+DWORD WINAPI function_client(LPVOID arg)
+{
+	SOCKET* hConnected = (SOCKET*)arg;
+	CSocket client;
+	//Chuyen ve lai CSocket
+	client.Attach(*hConnected);
+	fflush(stdin);
+	if (client.Connect(CA2W(sAdd), port) == 1)
+	{
+		cout << "Server da tat" << endl;
+	}
+	delete hConnected;
+	return 0;
+}
+
 int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 {
 	int nRetCode = 0;
@@ -34,23 +52,28 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 		{
 			// TODO: code your application's behavior here.
 			CSocket client;
-			char sAdd[1000];
-			unsigned int port = 1234; //Cung port voi server
 			AfxSocketInit(NULL);
 
 			//1. Tao socket
 			client.Create();
 
+			DWORD threadID;
+			HANDLE threadStatus;
+
 			// Nhap dic chi IP cua server
 			cout << "Nhap dia chi IP cua server: ";
 			gets_s(sAdd);
 			int correct = 0, continueCheck = 0, choice;
+
+			SOCKET* hConnected = new SOCKET();
+			//Chuyen doi CSocket thanh Socket
+			*hConnected = client.Detach();
+
 			if (client.Connect(CA2W(sAdd), port))
 			{
 				char User[100];
 				char Password[100];
 				int Usize, Psize;
-				cout << "Client da ket noi toi server" << endl;
 				cout << "1.Dang nhap" << endl;
 				cout << "2.Tao tai khoan" << endl;
 				cout << "Lua chon cua ban: "; cin >> choice;
@@ -119,8 +142,10 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 				}
 
 			Continue:
+				cout << "Client da ket noi toi server" << endl;
 				do
 				{
+					threadStatus = CreateThread(NULL, 0, function_client, hConnected, 0, &threadID);
 					cout << "\n1.Upload file len server\n";
 					cout << "2.Download file tu server\n";
 					cout << "0.Thoat\n";

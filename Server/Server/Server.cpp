@@ -33,31 +33,33 @@ int Check(char C[100], char R[100])
 	}
 }
 
-DWORD WINAPI function_cal(LPVOID arg)
+
+DWORD WINAPI function_server(LPVOID arg)
 {
 	SOCKET* hConnected = (SOCKET*)arg;
-	CSocket mysock;
+	CSocket server;
+
 	//Chuyen ve lai CSocket
-	mysock.Attach(*hConnected);
+	server.Attach(*hConnected);
 
 	int choice,Usize, Psize,correct = 0, continueCheck = 0;
 	char* User;
 	char* Password;
 
 	fflush(stdin);
-	mysock.Receive((char*)&choice, sizeof(int), 0);
+	server.Receive((char*)&choice, sizeof(int), 0);
 Loop:
 	//Nhan kich thuoc tai khoan tu client
-	mysock.Receive((char*)&Usize, sizeof(int), 0); // Neu nhan loi thi tra ve la SOCKET_ERROR.
+	server.Receive((char*)&Usize, sizeof(int), 0); // Neu nhan loi thi tra ve la SOCKET_ERROR.
 	User = new char[Usize + 1];
 	//Nhan tai khoan
-	mysock.Receive((char*)User, Usize, 0);
+	server.Receive((char*)User, Usize, 0);
 
 	//Nhan kich thuoc mat khau tu client
-	mysock.Receive((char*)&Psize, sizeof(int), 0); // Neu nhan loi thi tra ve la SOCKET_ERROR.
+	server.Receive((char*)&Psize, sizeof(int), 0); // Neu nhan loi thi tra ve la SOCKET_ERROR.
 	Password = new char[Psize + 1];
 	//Nhan mat khau
-	mysock.Receive((char*)Password, Psize, 0);
+	server.Receive((char*)Password, Psize, 0);
 	User[Usize] = '\0';
 	Password[Psize] = '\0';
 
@@ -89,7 +91,7 @@ Loop:
 		}
 	}
 	f.close();
-	mysock.Send(&correct, sizeof(correct), 0);
+	server.Send(&correct, sizeof(correct), 0);
 	if (correct == 0 && choice == 1)
 	{
 		goto Loop;
@@ -113,18 +115,18 @@ Loop:
 	do
 	{
 		//Nhan check value xem client co tiep tuc hay khong
-		mysock.Receive(&continueCheck, sizeof(continueCheck), 0);
+		server.Receive(&continueCheck, sizeof(continueCheck), 0);
 		bool status = true; // Tinh trang kha thi cua hoat dong
 		if (continueCheck == upload) {
-			mysock.Send(&status, sizeof(status), 0);
+			server.Send(&status, sizeof(status), 0);
 			if (status == true) {
 				char fileName[100];
 				char path[100] = "Database/";
 				int length = 0;
 				
 				// tao path "Database/fileName"
-				mysock.Receive(&length, sizeof(length), 0);
-				mysock.Receive(fileName, length, 0);
+				server.Receive(&length, sizeof(length), 0);
+				server.Receive(fileName, length, 0);
 				fileName[length] = '\0';
 				strcat_s(path, fileName);
 				
@@ -134,11 +136,11 @@ Loop:
 				int buffLength = 0; // do dai doan bin moi lan gui
 				
 				while (true) {
-					mysock.Receive(&buffLength, sizeof(buffLength), 0);
+					server.Receive(&buffLength, sizeof(buffLength), 0);
 					if (buffLength == 0) break;
 					else {
 						char* buff = new char[buffLength];
-						mysock.Receive(buff, buffLength, 0);
+						server.Receive(buff, buffLength, 0);
 						output.write(buff, buffLength);
 						delete[] buff;
 					}	
@@ -148,19 +150,19 @@ Loop:
 			}
 		}
 		else if (continueCheck == download) {
-			mysock.Send(&status, sizeof(status), 0);
+			server.Send(&status, sizeof(status), 0);
 			if (status == true) {
 				DIR* pDIR;
 				struct dirent* entry;
 				if (pDIR = opendir(databasePath)) {
 					while (entry = readdir(pDIR)) {
 						if (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0) {
-							mysock.Send(&(entry->d_namlen), sizeof(int), 0);
-							mysock.Send(&(entry->d_name), entry->d_namlen, 0);
+							server.Send(&(entry->d_namlen), sizeof(int), 0);
+							server.Send(&(entry->d_name), entry->d_namlen, 0);
 						}
 					}
 					int zero = 0; // thoat vong lap ben phia client
-					mysock.Send(&zero, sizeof(zero), 0);
+					server.Send(&zero, sizeof(zero), 0);
 					closedir(pDIR);
 				}
 			}
@@ -168,8 +170,8 @@ Loop:
 			char path[100] = "Database/";
 			char fileName[100];
 			int nameLength = 0;
-			mysock.Receive(&nameLength, sizeof(nameLength), 0);
-			mysock.Receive(fileName, nameLength, 0);
+			server.Receive(&nameLength, sizeof(nameLength), 0);
+			server.Receive(fileName, nameLength, 0);
 			fileName[nameLength] = '\0';
 			strcat_s(path, fileName);
 			
@@ -183,12 +185,12 @@ Loop:
 					download.read((char*)buff, size);
 					buffLength = download.gcount();
 					buff[buffLength] = '\0';
-					mysock.Send(&buffLength, sizeof(buffLength), 0);
-					mysock.Send(buff, buffLength, 0);
+					server.Send(&buffLength, sizeof(buffLength), 0);
+					server.Send(buff, buffLength, 0);
 				}
 				delete[] buff;
 				buffLength = 0;
-				mysock.Send(&buffLength, sizeof(buffLength), 0);
+				server.Send(&buffLength, sizeof(buffLength), 0);
 				cout << User << " da tai file " << fileName << endl;
 			}
 			else {
@@ -217,13 +219,11 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 		else
 		{
 			// TODO: code your application's behavior here.
-			CSocket server,s;
+			CSocket server, s;
 			unsigned int port = 1234;
-			int i;
 			AfxSocketInit(NULL);
 			DWORD threadID;
 			HANDLE threadStatus;
-
 			server.Create(port);
 			do {
 				cout << "Server lang nghe ket noi tu client" << endl;
@@ -235,7 +235,7 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 				*hConnected = s.Detach();
 				//Khoi tao thread tuong ung voi moi client Connect vao server.
 				//Nhu vay moi client se doc lap nhau, khong phai cho doi tung client xu ly rieng
-				threadStatus = CreateThread(NULL, 0, function_cal, hConnected, 0, &threadID);
+				threadStatus = CreateThread(NULL, 0, function_server, hConnected, 0, &threadID);
 			} while (1);
 		}
 	}
