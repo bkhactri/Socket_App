@@ -43,7 +43,6 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 			// TODO: code your application's behavior here.
 			CSocket client;
 			char sAdd[1000];
-			unsigned int port = 1234; //Cung port voi server
 			AfxSocketInit(NULL);
 
 			//1. Tao socket
@@ -136,9 +135,9 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 					cin >> continueCheck;
 
 					client.Send(&continueCheck, sizeof(continueCheck), 0);
-					bool status = false; 
-					client.Receive(&status, sizeof(int), 0);
-					if (status == true) {
+					bool isServerOperating = false;
+					client.Receive(&isServerOperating, sizeof(isServerOperating), 0);
+					if (isServerOperating == false) {
 						if (continueCheck == upload) {
 							cout << "\nNhap ten file muon upload: ";
 							char fileName[100];
@@ -146,32 +145,41 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 							cin.getline(fileName, 100);
 							int length = strlen(fileName);
 							fileName[length] = '\0';
-							fstream upload;
-							upload.open(fileName, ios::in | ios::binary);
-							if (upload.good()) {
-								client.Send(&length, sizeof(length), 0);
-								client.Send(fileName, length, 0);
-								int size = 1024 * 1024;
-								char* buff = new char[size];
-								int buffLength = 0;
-								while (!upload.eof()) {
-									upload.read((char*)buff, size);
-									buffLength = upload.gcount();
-									buff[length] = '\0';
+							fstream f;
+							f.open(fileName, ios::in | ios::binary);
+							bool exist = false;
+							if (f.good()) {
+								exist = true;
+								client.Send(&exist, sizeof(exist), 0);
+								int s = fileSize(fileName);
+								if (s <= max_file_size) {
+									// cout << "Dung luong: " << s << " bytes" << endl;
+									client.Send(&length, sizeof(length), 0);
+									client.Send(fileName, length, 0);
+									int size = 1024 * 1024;
+									char* buff = new char[size];
+									int buffLength = 0;
+									while (!f.eof()) {
+										f.read((char*)buff, size);
+										buffLength = f.gcount();
+										buff[length] = '\0';
+										client.Send(&buffLength, sizeof(buffLength), 0);
+										client.Send(buff, buffLength, 0);
+									}
+									delete[] buff;
+									buffLength = 0;
 									client.Send(&buffLength, sizeof(buffLength), 0);
-									client.Send(buff, buffLength, 0);
+									cout << "File " << fileName << " da duoc upload len server.\n";
 								}
-								delete[] buff;
-								buffLength = 0;
-								client.Send(&buffLength, sizeof(buffLength), 0);
 							}
 							else {
+								client.Send(&exist, sizeof(exist), 0);
 								cout << "\nKhong ton tai ten file.\n";
 							}
-							upload.close();
+							f.close();
 						}
 						else if (continueCheck == download) {
-							cout << "\nDanh sach file ton tai tren database cua server:\n";
+							cout << "Danh sach file ton tai tren database cua server:\n";
 							char fileName[100];
 							int nameLength = 0;
 							while (true) {
@@ -191,23 +199,32 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 							client.Send(&nameLength, sizeof(nameLength), 0);
 							client.Send(fileName, nameLength, 0);
 
-							fstream output;
-							output.open(fileName, ios::out | ios::binary);
-							int buffLength = 0; // do dai doan bin moi lan gui
-
-							while (true) {
-								client.Receive(&buffLength, sizeof(buffLength), 0);
-								if (buffLength == 0) break;
-								else {
-									char* buff = new char[buffLength];
-									client.Receive(buff, buffLength, 0);
-									output.write(buff, buffLength);
-									delete[] buff;
+							bool exist = false;
+							client.Receive(&exist, sizeof(exist), 0);
+							if (exist == true) {
+								fstream output;
+								output.open(fileName, ios::out | ios::binary);
+								int buffLength = 0; // do dai doan bin moi lan gui
+								while (true) {
+									client.Receive(&buffLength, sizeof(buffLength), 0);
+									if (buffLength == 0) break;
+									else {
+										char* buff = new char[buffLength];
+										client.Receive(buff, buffLength, 0);
+										output.write(buff, buffLength);
+										delete[] buff;
+									}
 								}
+								output.close();
+								cout << "Da download file thanh cong.\n";
 							}
-							output.close();
-							cout << "\nDa download file thanh cong.\n";
+							else {
+								cout << "Khong ton tai file tren server.\n";
+							}
 						}
+					}
+					else {
+						cout << "Server dang ban, hay thu hien thao tac sau.\n";
 					}
 				} while (continueCheck != 0);
 				// Dong ket noi
