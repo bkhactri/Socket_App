@@ -9,6 +9,14 @@
 #define new DEBUG_NEW
 #endif
 
+int fileSize(char* path) {
+	ifstream f(path, ios::binary);
+	f.seekg(0, ios::end);
+	int file_size = f.tellg();
+	f.seekg(0, ios::beg);
+	f.close();
+	return file_size;
+}
 
 // The one and only application object
 
@@ -151,8 +159,9 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 					cout << "0.Thoat\n";
 					cout << "Choice: ";
 					cin >> continueCheck;
+
 					client.Send(&continueCheck, sizeof(continueCheck), 0);
-					bool status = false;
+					bool status = false; 
 					client.Receive(&status, sizeof(int), 0);
 					if (status == true) {
 						if (continueCheck == upload) {

@@ -1,5 +1,5 @@
 ﻿// Server.cpp : Defines the entry point for the console application.
-
+#define _CRT_SECURE_NO_WARNINGS
 #include "stdafx.h"
 #include "Server.h"
 #include "afxsock.h"
@@ -9,6 +9,48 @@
 #define new DEBUG_NEW
 #endif
 
+int fileSize(char* path) {
+	ifstream f(path, ios::binary);
+	f.seekg(0, ios::end);
+	int file_size = f.tellg();
+	f.seekg(0, ios::beg);
+	f.close();
+	return file_size;
+}
+
+void duplicateFile(char* path, char* fileName, int dotPos, int& count) {
+	DIR* pDIR;
+	struct dirent* entry;
+	if (pDIR = opendir(databasePath)) {
+		while (entry = readdir(pDIR)) {
+			if (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0) {
+				if (strcmp(fileName, entry->d_name) == 0) {
+					// Lay vi tri '.'
+					int length = strlen(fileName);
+					int newDotPos = 0;
+					for (int i = length - 1; i >= 0; i--) {
+						if (fileName[i] == '.') {
+							newDotPos = i;
+							break;
+						}
+					}
+					if (count == 0) dotPos = newDotPos;
+					count++;
+					char adder[10] = " (";
+					char dupTimes[10];
+					_itoa(count, dupTimes, 10);
+					strcat(adder, dupTimes);
+					strcat(adder, (char*)")");
+					strcat(adder, fileName + newDotPos);
+					strcpy(fileName + dotPos, adder);
+					duplicateFile(path, fileName, dotPos, count);
+					break;
+				}
+			}
+		}
+		closedir(pDIR);
+	}
+}
 
 // The one and only application object
 CWinApp theApp;
@@ -128,6 +170,9 @@ Loop:
 				server.Receive(&length, sizeof(length), 0);
 				server.Receive(fileName, length, 0);
 				fileName[length] = '\0';
+				int count = 0;
+				int dotPos = 0;
+				duplicateFile((char*)databasePath, fileName, dotPos, count);
 				strcat_s(path, fileName);
 				
 				// fstream cua file duoc upload
@@ -170,11 +215,17 @@ Loop:
 			char path[100] = "Database/";
 			char fileName[100];
 			int nameLength = 0;
+<<<<<<< HEAD
 			server.Receive(&nameLength, sizeof(nameLength), 0);
 			server.Receive(fileName, nameLength, 0);
+=======
+			mysock.Receive(&nameLength, sizeof(nameLength), 0);
+			mysock.Receive(fileName, nameLength, 0);
+			
+
+>>>>>>> 8132828bfada87f226b11a9a538f3feeb772531f
 			fileName[nameLength] = '\0';
 			strcat_s(path, fileName);
-			
 			fstream download;
 			download.open(path, ios::in | ios::binary);
 			if (download.good()) {
