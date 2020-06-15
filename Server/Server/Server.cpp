@@ -4,6 +4,11 @@
 #include "Server.h"
 #include "afxsock.h"
 #include "math.h"
+#include<conio.h>
+
+// The one and only application object
+CWinApp theApp;
+using namespace std;
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -52,11 +57,6 @@ void duplicateFile(char* path, char* fileName, int dotPos, int& count) {
 	}
 }
 
-// The one and only application object
-CWinApp theApp;
-
-using namespace std;
-
 int Check(char C[100], char R[100])
 {
 	int s1 = strlen(C);
@@ -75,16 +75,53 @@ int Check(char C[100], char R[100])
 	}
 }
 
+void handleClose()
+{
+	int bESCPressed = 0;
+	do
+	{
+		bESCPressed = (_getch() == 27);
+	} while (!bESCPressed);
+}
 
-DWORD WINAPI function_server(LPVOID arg)
+DWORD WINAPI threadFunction_stop(LPVOID arg)
+{
+	do
+	{
+		if (status == 1)
+		{
+			cout << "Server da ngat ket noi" << endl;
+			exit(0);
+		}
+	} while (true);
+	return 0;
+}
+
+DWORD WINAPI threadFunction_stop_each_client(LPVOID arg)
+{
+	int flag;
+	unsigned int port1 = 1235;
+	HMODULE hModule = ::GetModuleHandle(NULL);
+	CSocket server, s;
+	AfxSocketInit(NULL);
+	server.Create(port1);
+	server.Listen();
+	server.Accept(s);
+	handleClose();
+	flag = 1;
+	s.Send(&flag, sizeof(flag), 0);
+	status = 1;
+	return 0;
+}
+
+DWORD WINAPI threadFunction_handle_each_client(LPVOID arg)
 {
 	SOCKET* hConnected = (SOCKET*)arg;
 	CSocket server;
-
 	//Chuyen ve lai CSocket
 	server.Attach(*hConnected);
 
-	int choice,Usize, Psize,correct = 0, continueCheck = 0;
+	int choice, Usize = 0, Psize = 0, correct = 0, continueCheck = 0;
 	char* User;
 	char* Password;
 
@@ -106,7 +143,6 @@ Loop:
 	Password[Psize] = '\0';
 
 	fstream f;
-	int size;
 	f.open("User.bin", ios::binary || ios::in);
 	if (f.fail()) { return 0; }
 	//f >> size;
@@ -140,7 +176,7 @@ Loop:
 	}
 	else if (correct == 0 && choice == 2)
 	{
-		cout << User << " da tao tai khoan thanh cong dang trong tinh trang dang nhap" << endl;
+		cout << User << " da tao tai khoan" << endl;
 		f.open("User.bin", ios::app);
 		if (f.fail()) { return 0; }
 		f << User << endl;
@@ -153,55 +189,63 @@ Loop:
 		goto Loop;
 	}
 
-
-	do
+	do 
 	{
 		//Nhan check value xem client co tiep tuc hay khong
 		server.Receive(&continueCheck, sizeof(continueCheck), 0);
-		bool status = true; // Tinh trang kha thi cua hoat dong
-		if (continueCheck == upload) {
-			server.Send(&status, sizeof(status), 0);
-			if (status == true) {
-				char fileName[100];
-				char path[100] = "Database/";
-				int length = 0;
-				
-				// tao path "Database/fileName"
-				server.Receive(&length, sizeof(length), 0);
-				server.Receive(fileName, length, 0);
-				fileName[length] = '\0';
-				int count = 0;
-				int dotPos = 0;
-				duplicateFile((char*)databasePath, fileName, dotPos, count);
-				strcat_s(path, fileName);
-				
-				// fstream cua file duoc upload
-				fstream output;
-				output.open(path, ios::out | ios::binary);
-				int buffLength = 0; // do dai doan bin moi lan gui
-				
-				while (true) {
-					server.Receive(&buffLength, sizeof(buffLength), 0);
-					if (buffLength == 0) break;
-					else {
-						char* buff = new char[buffLength];
-						server.Receive(buff, buffLength, 0);
-						output.write(buff, buffLength);
-						delete[] buff;
-					}	
+		server.Send(&isOperating, sizeof(isOperating), 0);
+		if (isOperating == false) 
+		{
+			isOperating = true;
+			if (continueCheck == upload) 
+			{
+				isOperating = true;
+				bool exist = false;
+				server.Receive(&exist, sizeof(exist), 0);
+				if (exist == true) 
+				{
+					char fileName[100];
+					char path[100] = "Database/";
+					int length = 0;
+
+					// tao path "Database/fileName"
+					server.Receive(&length, sizeof(length), 0);
+					server.Receive(fileName, length, 0);
+					fileName[length] = '\0';
+					int count = 0;
+					int dotPos = 0;
+					duplicateFile((char*)databasePath, fileName, dotPos, count);
+					strcat_s(path, fileName);
+
+					// fstream cua file duoc upload
+					fstream output;
+					output.open(path, ios::out | ios::binary);
+					int buffLength = 0; // do dai doan bin moi lan gui
+
+					while (true) {
+						server.Receive(&buffLength, sizeof(buffLength), 0);
+						if (buffLength == 0) break;
+						else {
+							char* buff = new char[buffLength];
+							server.Receive(buff, buffLength, 0);
+							output.write(buff, buffLength);
+							delete[] buff;
+						}
+					}
+					output.close();
+					cout << "File " << fileName << " da duoc " << User << " upload len Database.\n";
 				}
-				output.close();
-				cout << "File " << fileName << " da duoc " << User << " upload len Database.\n";
 			}
-		}
-		else if (continueCheck == download) {
-			server.Send(&status, sizeof(status), 0);
-			if (status == true) {
+			else if (continueCheck == download) 
+			{
 				DIR* pDIR;
 				struct dirent* entry;
-				if (pDIR = opendir(databasePath)) {
-					while (entry = readdir(pDIR)) {
-						if (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0) {
+				if (pDIR = opendir(databasePath)) 
+				{
+					while (entry = readdir(pDIR)) 
+					{
+						if (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0) 
+						{
 							server.Send(&(entry->d_namlen), sizeof(int), 0);
 							server.Send(&(entry->d_name), entry->d_namlen, 0);
 						}
@@ -210,45 +254,48 @@ Loop:
 					server.Send(&zero, sizeof(zero), 0);
 					closedir(pDIR);
 				}
-			}
-	
-			char path[100] = "Database/";
-			char fileName[100];
-			int nameLength = 0;
-<<<<<<< HEAD
-			server.Receive(&nameLength, sizeof(nameLength), 0);
-			server.Receive(fileName, nameLength, 0);
-=======
-			mysock.Receive(&nameLength, sizeof(nameLength), 0);
-			mysock.Receive(fileName, nameLength, 0);
-			
+				char path[100] = "Database/";
+				char fileName[100];
+				int nameLength = 0;
+				server.Receive(&nameLength, sizeof(nameLength), 0);
+				server.Receive(fileName, nameLength, 0);
+				fileName[nameLength] = '\0';
+				cout << User << " muon tai file " << fileName << endl;
+				strcat_s(path, fileName);
 
->>>>>>> 8132828bfada87f226b11a9a538f3feeb772531f
-			fileName[nameLength] = '\0';
-			strcat_s(path, fileName);
-			fstream download;
-			download.open(path, ios::in | ios::binary);
-			if (download.good()) {
-				int size = 1024 * 1024;
-				char* buff = new char[size];
-				int buffLength = 0;
-				while (!download.eof()) {
-					download.read((char*)buff, size);
-					buffLength = download.gcount();
-					buff[buffLength] = '\0';
+				ifstream f;
+				bool exist = false;
+				f.open(path, ios::in | ios::binary);
+				if (f.good())
+				{
+					exist = true;
+					server.Send(&exist, sizeof(exist), 0);
+					int size = 1024 * 1024;
+					char* buff = new char[size];
+					int buffLength = 0;
+					while (!f.eof()) 
+					{
+						f.read((char*)buff, size);
+						buffLength = f.gcount();
+						buff[buffLength] = '\0';
+						server.Send(&buffLength, sizeof(buffLength), 0);
+						server.Send(buff, buffLength, 0);
+					}
+					delete[] buff;
+					buffLength = 0;
 					server.Send(&buffLength, sizeof(buffLength), 0);
-					server.Send(buff, buffLength, 0);
+					cout << User << " da tai file " << fileName << endl;
 				}
-				delete[] buff;
-				buffLength = 0;
-				server.Send(&buffLength, sizeof(buffLength), 0);
-				cout << User << " da tai file " << fileName << endl;
+				else 
+				{
+					server.Send(&exist, sizeof(exist), 0);
+					cout << "Khong ton tai file " << fileName << endl;
+				}
+				f.close();
 			}
-			else {
-				cout << "Khong ton tai ten file.\n";
-			}
+			isOperating = false;
 		}
-	} while (continueCheck);	
+	} while (continueCheck);
 	cout << User << " da dang xuat" << endl;
 	delete hConnected;
 	return 0;
@@ -256,7 +303,10 @@ Loop:
 
 int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 {
+	long long int i = 1;
 	int nRetCode = 0;
+	DWORD threadID1, threadID2,threadID3;
+	HANDLE threadClient, threadStopEachClient, threadStop;
 	HMODULE hModule = ::GetModuleHandle(NULL);
 	if (hModule != NULL)
 	{
@@ -271,13 +321,17 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 		{
 			// TODO: code your application's behavior here.
 			CSocket server, s;
-			unsigned int port = 1234;
 			AfxSocketInit(NULL);
-			DWORD threadID;
-			HANDLE threadStatus;
 			server.Create(port);
-			do {
-				cout << "Server lang nghe ket noi tu client" << endl;
+
+			//Khoi tao thread de nam bat su kien server bi van de
+			cout << "Nhan ESC de release moi Client va tat Server" << endl;
+			threadStop = CreateThread(NULL, 0, threadFunction_stop, NULL, 0, &threadID2);
+			do
+			{
+				threadStopEachClient = CreateThread(NULL, 0, threadFunction_stop_each_client, NULL, 0, &threadID2);
+				Sleep(15);
+				cout << "S" << "[" << i << "]" << ": Server lang nghe ket noi tu client" << endl;
 				server.Listen();
 				server.Accept(s);
 				//Khoi tao con tro Socket
@@ -286,8 +340,9 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 				*hConnected = s.Detach();
 				//Khoi tao thread tuong ung voi moi client Connect vao server.
 				//Nhu vay moi client se doc lap nhau, khong phai cho doi tung client xu ly rieng
-				threadStatus = CreateThread(NULL, 0, function_server, hConnected, 0, &threadID);
-			} while (1);
+				threadClient = CreateThread(NULL, 0, threadFunction_handle_each_client, hConnected, 0, &threadID1);
+				i++;
+			} while (true);
 		}
 	}
 	else
@@ -296,6 +351,5 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 		_tprintf(_T("Fatal Error: GetModuleHandle failed\n"));
 		nRetCode = 1;
 	}
-	getchar();
 	return nRetCode;
 }

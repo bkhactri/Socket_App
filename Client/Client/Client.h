@@ -5,11 +5,11 @@
 #include <fstream>
 using namespace std;
 
-const int upload = 1;
-const int download = 2;
-const int max_file_size = 1024*1024*200;
+#define port 1234
+#define upload 1
+#define download  2
+#define max_file_size  1024*1024*200
 
+void handleClose();
+char sAdd[1000];
 int fileSize(char* path);
-
-
-
