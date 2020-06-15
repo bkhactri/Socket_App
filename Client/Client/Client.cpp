@@ -182,25 +182,20 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 				cout << "Client da ket noi toi server" << endl;
 				do
 				{
-					Choose:
+					cout << "Moi lua chon tac vu" << endl;
 					cout << "\n1.Upload file len server\n";
 					cout << "2.Download file tu server\n";
 					cout << "0.Thoat\n";
 					cout << "Choice: ";
 					cin >> continueCheck;
 
-					if (cin.fail())
-					{
-						cin.clear();
-						cin.ignore(256, '\n');
-						goto Choose;
-					}
-
 					client.Send(&continueCheck, sizeof(continueCheck), 0);
 					bool isServerOperating = false;
 					client.Receive(&isServerOperating, sizeof(isServerOperating), 0);
-					if (isServerOperating == false) {
-						if (continueCheck == upload) {
+					if (isServerOperating == false) 
+					{
+						if (continueCheck == upload)
+						{
 							cout << "\nNhap ten file muon upload: ";
 							char fileName[100];
 							cin.ignore();
@@ -210,12 +205,13 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 							fstream f;
 							f.open(fileName, ios::in | ios::binary);
 							bool exist = false;
-						
-								if (f.good()) {
+							if (f.good())
+							{
 								exist = true;
 								client.Send(&exist, sizeof(exist), 0);
 								int s = fileSize(fileName);
-								if (s <= max_file_size) {
+								if (s <= max_file_size) 
+								{
 									// cout << "Dung luong: " << s << " bytes" << endl;
 									client.Send(&length, sizeof(length), 0);
 									client.Send(fileName, length, 0);
@@ -224,7 +220,6 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 									int buffLength = 0;
 									while (!f.eof()) 
 									{
-
 										f.read((char*)buff, size);
 										buffLength = f.gcount();
 										buff[length] = '\0';
@@ -239,17 +234,18 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 								else
 								{
 									cout << "File " << fileName << " khong duoc upload len server do dung lyong vuot qua 200MB." << endl;
-									cout << "Dung luong thuc te cua file " << double(s) / (pow(1024,2.0)) << "MB" << endl;
+									cout << "Dung luong thuc te cua file " << double(s) / (pow(1024, 2.0)) << "MB" << endl;
 								}
 							}
-							else {
-
+							else 
+							{
 								client.Send(&exist, sizeof(exist), 0);
 								cout << "\nKhong ton tai ten file.\n";
 							}
 							f.close();
 						}
-						else if (continueCheck == download) {
+						else if (continueCheck == download) 
+						{
 							cout << "Danh sach file ton tai tren database cua server:\n";
 							char fileName[100];
 							int nameLength = 0;
@@ -274,16 +270,17 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 
 							bool exist = false;
 							client.Receive(&exist, sizeof(exist), 0);
-
-							if (exist == true) 
+							if (exist == true)
 							{
 								fstream output;
 								output.open(fileName, ios::out | ios::binary);
 								int buffLength = 0; // do dai doan bin moi lan gui
-								while (true) {
+								while (true) 
+								{
 									client.Receive(&buffLength, sizeof(buffLength), 0);
 									if (buffLength == 0) break;
-									else {
+									else 
+									{
 										char* buff = new char[buffLength];
 										client.Receive(buff, buffLength, 0);
 										output.write(buff, buffLength);
@@ -293,15 +290,13 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 								output.close();
 								cout << "Da download file thanh cong.\n";
 							}
-							else
+							else 
 							{
 								cout << "Khong ton tai file tren server.\n";
 							}
 						}
 					}
-
 					else {
-
 						cout << "Server dang ban, hay thu hien thao tac sau.\n";
 					}
 				} while (continueCheck != 0);
@@ -310,15 +305,15 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 			}
 			else
 			{
-				cout << "Khong connect duoc toi server...." << endl;
+				cout << "Khong connect duoc toi server...." << endl;;
 			}
 		}
 	}
 	else
 	{
-		// TODO: change error code to suit your needs
-		_tprintf(_T("Fatal Error: GetModuleHandle failed\n"));
-		nRetCode = 1;
+	// TODO: change error code to suit your needs
+	_tprintf(_T("Fatal Error: GetModuleHandle failed\n"));
+	nRetCode = 1;
 	}
 	return nRetCode;
 }

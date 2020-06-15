@@ -176,7 +176,7 @@ Loop:
 	}
 	else if (correct == 0 && choice == 2)
 	{
-		cout << User << " da tao tai khoan" << endl;
+		cout << User << " da tao tai khoan thanh cong" << endl;
 		f.open("User.bin", ios::app);
 		if (f.fail()) { return 0; }
 		f << User << endl;
@@ -189,7 +189,7 @@ Loop:
 		goto Loop;
 	}
 
-	do
+	do 
 	{
 		//Nhan check value xem client co tiep tuc hay khong
 		server.Receive(&continueCheck, sizeof(continueCheck), 0);
@@ -197,22 +197,20 @@ Loop:
 		if (isOperating == false)
 		{
 			isOperating = true;
-			if (continueCheck == upload)
+			if (continueCheck == upload) 
 			{
 				isOperating = true;
 				bool exist = false;
 				server.Receive(&exist, sizeof(exist), 0);
-				if (exist == true)
+				if (exist == true) 
 				{
 					char fileName[100];
 					char path[100] = "Database/";
 					int length = 0;
 
 					// tao path "Database/fileName"
-
 					server.Receive(&length, sizeof(length), 0);
 					server.Receive(fileName, length, 0);
-
 					fileName[length] = '\0';
 					int count = 0;
 					int dotPos = 0;
@@ -232,102 +230,74 @@ Loop:
 						{
 							char* buff = new char[buffLength];
 							server.Receive(buff, buffLength, 0);
-							if (buffLength == 0) break;
-							else {
-								char* buff = new char[buffLength];
-								output.write(buff, buffLength);
-								delete[] buff;
-							}
-						}
-						output.close();
-						cout << "File " << fileName << " da duoc " << User << " upload len Database.\n";
-					}
-				}
-				else if (continueCheck == download)
-				{
-					cout << User << " muon download file tu server\n" << endl;
-					DIR* pDIR;
-					struct dirent* entry;
-					if (pDIR = opendir(databasePath))
-					{
-						while (entry = readdir(pDIR))
-						{
-							if (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0)
-							{
-								server.Send(&(entry->d_namlen), sizeof(int), 0);
-								server.Send(&(entry->d_name), entry->d_namlen, 0);
-							}
-						}
-						int zero = 0; // thoat vong lap ben phia client
-						server.Send(&zero, sizeof(zero), 0);
-						closedir(pDIR);
-					}
-					char path[100] = "Database/";
-					char fileName[100];
-					int nameLength = 0;
-
-					server.Receive(&nameLength, sizeof(nameLength), 0);
-					server.Receive(fileName, nameLength, 0);
-
-					fileName[nameLength] = '\0';
-					cout << User << " muon tai file " << fileName << endl;
-					strcat_s(path, fileName);
-
-					ifstream f;
-					bool exist = false;
-					f.open(path, ios::in | ios::binary);
-
-					if (f.good())
-					{
-						exist = true;
-						server.Send(&exist, sizeof(exist), 0);
-						int size = 1024 * 1024;
-						char* buff = new char[size];
-						int buffLength = 0;
-						while (!f.eof())
-						{
-							f.read((char*)buff, size);
-							buffLength = f.gcount();
-							buff[buffLength] = '\0';
-							server.Send(&buffLength, sizeof(buffLength), 0);
-							server.Send(buff, buffLength, 0);
-						}
-						delete[] buff;
-						buffLength = 0;
-						server.Send(&buffLength, sizeof(buffLength), 0);
-						cout << User << " da tai file " << fileName << endl;
-					}
-					else
-					{
-						server.Send(&exist, sizeof(exist), 0);
-
-						if (f.good())
-						{
-							exist = true;
-							int size = 1024 * 1024;
-							char* buff = new char[size];
-							int buffLength = 0;
-							while (!f.eof())
-							{
-								f.read((char*)buff, size);
-								buffLength = f.gcount();
-								buff[buffLength] = '\0';
-							}
+							output.write(buff, buffLength);
 							delete[] buff;
-							buffLength = 0;
-							cout << User << " da tai file " << fileName << endl;
 						}
-						else
-						{
-							cout << "Khong ton tai file " << fileName << endl;
-						}
-						f.close();
 					}
-					isOperating = false;
+					output.close();
+					cout << "File " << fileName << " da duoc " << User << " upload len Database.\n";
 				}
 			}
+			else if (continueCheck == download) 
+			{
+				DIR* pDIR;
+				struct dirent* entry;
+				if (pDIR = opendir(databasePath)) 
+				{
+					while (entry = readdir(pDIR)) 
+					{
+						if (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0) 
+						{
+							server.Send(&(entry->d_namlen), sizeof(int), 0);
+							server.Send(&(entry->d_name), entry->d_namlen, 0);
+						}
+					}
+					int zero = 0; // thoat vong lap ben phia client
+					server.Send(&zero, sizeof(zero), 0);
+					closedir(pDIR);
+				}
+				char path[100] = "Database/";
+				char fileName[100];
+				int nameLength = 0;
+				server.Receive(&nameLength, sizeof(nameLength), 0);
+				server.Receive(fileName, nameLength, 0);
+				fileName[nameLength] = '\0';
+				cout << User << " muon tai file " << fileName << endl;
+				strcat_s(path, fileName);
+
+				ifstream f;
+				bool exist = false;
+				f.open(path, ios::in | ios::binary);
+				if (f.good()) 
+				{
+					exist = true;
+					server.Send(&exist, sizeof(exist), 0);
+					int size = 1024 * 1024;
+					char* buff = new char[size];
+					int buffLength = 0;
+					while (!f.eof()) 
+					{
+						f.read((char*)buff, size);
+						buffLength = f.gcount();
+						buff[buffLength] = '\0';
+						server.Send(&buffLength, sizeof(buffLength), 0);
+						server.Send(buff, buffLength, 0);
+					}
+					delete[] buff;
+					buffLength = 0;
+					server.Send(&buffLength, sizeof(buffLength), 0);
+					cout << User << " da tai file " << fileName << endl;
+				}
+				else 
+				{
+					server.Send(&exist, sizeof(exist), 0);
+					cout << "Khong ton tai file " << fileName << endl;
+				}
+				f.close();
+			}
+			isOperating = false;
 		}
-	}while (continueCheck);
+	} while (continueCheck);
 	cout << User << " da dang xuat" << endl;
 	delete hConnected;
 	return 0;
@@ -353,7 +323,7 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 		{
 			// TODO: code your application's behavior here.
 
-			CSocket server, s;
+			CSocket server, joiner;
 			AfxSocketInit(NULL);
 			server.Create(port);
 
@@ -366,13 +336,12 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 				Sleep(15);
 				cout << "S" << "[" << i << "]" << ": Server lang nghe ket noi tu client" << endl;
 				server.Listen();
-				server.Accept(s);
+				server.Accept(joiner);
 				//Khoi tao con tro Socket
 				SOCKET* hConnected = new SOCKET();
 				//Chuyen doi CSocket thanh Socket
-				*hConnected = s.Detach();
+				*hConnected = joiner.Detach();
 				//Khoi tao thread tuong ung voi moi client Connect vao server.
-
 				threadClient = CreateThread(NULL, 0, threadFunction_handle_each_client, hConnected, 0, &threadID1);
 				i++;
 			} while (true);
