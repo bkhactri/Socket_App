@@ -3,7 +3,12 @@
 #include "resource.h"
 #include<fstream>
 #include<iostream>
+#define port 1234
+#define upload 1
+#define download 2
+#define max_file_size 1024 * 1024 * 200
 using namespace std;
+<<<<<<< HEAD
 
 
 #define port 1234
@@ -12,6 +17,8 @@ using namespace std;
 #define max_file_size 1024 * 1024 * 200
 
 static int status = 0;
+=======
+>>>>>>> 0e73a18b019e19b08f5a900188c7b4b037403236
 const char databasePath[] = "Database";
 bool isOperating = false;
 int fileSize(char* path);

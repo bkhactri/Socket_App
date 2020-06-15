@@ -84,6 +84,10 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 		{
 			// TODO: code your application's behavior here.
 			CSocket client;
+<<<<<<< HEAD
+=======
+			char sAdd[1000];
+>>>>>>> 0e73a18b019e19b08f5a900188c7b4b037403236
 			AfxSocketInit(NULL);
 
 			//Tao socket
@@ -198,10 +202,15 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 					client.Send(&continueCheck, sizeof(continueCheck), 0);
 					bool isServerOperating = false;
 					client.Receive(&isServerOperating, sizeof(isServerOperating), 0);
+<<<<<<< HEAD
 					if (isServerOperating == false) 
 					{
 						if (continueCheck == upload) 
 						{
+=======
+					if (isServerOperating == false) {
+						if (continueCheck == upload) {
+>>>>>>> 0e73a18b019e19b08f5a900188c7b4b037403236
 							cout << "\nNhap ten file muon upload: ";
 							char fileName[100];
 							cin.ignore();
@@ -211,6 +220,7 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 							fstream f;
 							f.open(fileName, ios::in | ios::binary);
 							bool exist = false;
+<<<<<<< HEAD
 							if (f.good()) 
 							{
 								exist = true;
@@ -218,14 +228,25 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 								int s = fileSize(fileName);
 								if (s <= max_file_size) 
 								{
+=======
+							if (f.good()) {
+								exist = true;
+								client.Send(&exist, sizeof(exist), 0);
+								int s = fileSize(fileName);
+								if (s <= max_file_size) {
+>>>>>>> 0e73a18b019e19b08f5a900188c7b4b037403236
 									// cout << "Dung luong: " << s << " bytes" << endl;
 									client.Send(&length, sizeof(length), 0);
 									client.Send(fileName, length, 0);
 									int size = 1024 * 1024;
 									char* buff = new char[size];
 									int buffLength = 0;
+<<<<<<< HEAD
 									while (!f.eof()) 
 									{
+=======
+									while (!f.eof()) {
+>>>>>>> 0e73a18b019e19b08f5a900188c7b4b037403236
 										f.read((char*)buff, size);
 										buffLength = f.gcount();
 										buff[length] = '\0';
@@ -236,6 +257,7 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 									buffLength = 0;
 									client.Send(&buffLength, sizeof(buffLength), 0);
 									cout << "File " << fileName << " da duoc upload len server.\n";
+<<<<<<< HEAD
 								}
 								else
 								{
@@ -245,13 +267,22 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 							}
 							else 
 							{
+=======
+								}
+							}
+							else {
+>>>>>>> 0e73a18b019e19b08f5a900188c7b4b037403236
 								client.Send(&exist, sizeof(exist), 0);
 								cout << "\nKhong ton tai ten file.\n";
 							}
 							f.close();
 						}
+<<<<<<< HEAD
 						else if (continueCheck == download) 
 						{
+=======
+						else if (continueCheck == download) {
+>>>>>>> 0e73a18b019e19b08f5a900188c7b4b037403236
 							cout << "Danh sach file ton tai tren database cua server:\n";
 							char fileName[100];
 							int nameLength = 0;
@@ -276,6 +307,7 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 
 							bool exist = false;
 							client.Receive(&exist, sizeof(exist), 0);
+<<<<<<< HEAD
 							if (exist == true) 
 							{
 								fstream output;
@@ -287,6 +319,16 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 									if (buffLength == 0) break;
 									else 
 									{
+=======
+							if (exist == true) {
+								fstream output;
+								output.open(fileName, ios::out | ios::binary);
+								int buffLength = 0; // do dai doan bin moi lan gui
+								while (true) {
+									client.Receive(&buffLength, sizeof(buffLength), 0);
+									if (buffLength == 0) break;
+									else {
+>>>>>>> 0e73a18b019e19b08f5a900188c7b4b037403236
 										char* buff = new char[buffLength];
 										client.Receive(buff, buffLength, 0);
 										output.write(buff, buffLength);
@@ -296,14 +338,22 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 								output.close();
 								cout << "Da download file thanh cong.\n";
 							}
+<<<<<<< HEAD
 							else 
 							{
+=======
+							else {
+>>>>>>> 0e73a18b019e19b08f5a900188c7b4b037403236
 								cout << "Khong ton tai file tren server.\n";
 							}
 						}
 					}
+<<<<<<< HEAD
 					else 
 					{
+=======
+					else {
+>>>>>>> 0e73a18b019e19b08f5a900188c7b4b037403236
 						cout << "Server dang ban, hay thu hien thao tac sau.\n";
 					}
 				} while (continueCheck != 0);
