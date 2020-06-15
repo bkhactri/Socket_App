@@ -189,48 +189,30 @@ Loop:
 		goto Loop;
 	}
 
-<<<<<<< HEAD
-	do 
+	do
 	{
 		//Nhan check value xem client co tiep tuc hay khong
 		server.Receive(&continueCheck, sizeof(continueCheck), 0);
 		server.Send(&isOperating, sizeof(isOperating), 0);
-		if (isOperating == false) 
+		if (isOperating == false)
 		{
 			isOperating = true;
-			if (continueCheck == upload) 
+			if (continueCheck == upload)
 			{
 				isOperating = true;
 				bool exist = false;
 				server.Receive(&exist, sizeof(exist), 0);
-				if (exist == true) 
+				if (exist == true)
 				{
-=======
-
-	do{
-		//Nhan check value xem client co tiep tuc hay khong
-		mysock.Receive(&continueCheck, sizeof(continueCheck), 0);
-		mysock.Send(&isOperating, sizeof(isOperating), 0);
-		if (isOperating == false) {
-			isOperating = true;
-			if (continueCheck == upload) {
-				isOperating = true;
-				bool exist = false;
-				mysock.Receive(&exist, sizeof(exist), 0);
-				if (exist == true) {
->>>>>>> 0e73a18b019e19b08f5a900188c7b4b037403236
 					char fileName[100];
 					char path[100] = "Database/";
 					int length = 0;
 
 					// tao path "Database/fileName"
-<<<<<<< HEAD
+
 					server.Receive(&length, sizeof(length), 0);
 					server.Receive(fileName, length, 0);
-=======
-					mysock.Receive(&length, sizeof(length), 0);
-					mysock.Receive(fileName, length, 0);
->>>>>>> 0e73a18b019e19b08f5a900188c7b4b037403236
+
 					fileName[length] = '\0';
 					int count = 0;
 					int dotPos = 0;
@@ -242,121 +224,110 @@ Loop:
 					output.open(path, ios::out | ios::binary);
 					int buffLength = 0; // do dai doan bin moi lan gui
 
-					while (true) {
-<<<<<<< HEAD
+					while (true) 
+					{
 						server.Receive(&buffLength, sizeof(buffLength), 0);
 						if (buffLength == 0) break;
-						else {
+						else 
+						{
 							char* buff = new char[buffLength];
 							server.Receive(buff, buffLength, 0);
-=======
-						mysock.Receive(&buffLength, sizeof(buffLength), 0);
-						if (buffLength == 0) break;
-						else {
-							char* buff = new char[buffLength];
-							mysock.Receive(buff, buffLength, 0);
->>>>>>> 0e73a18b019e19b08f5a900188c7b4b037403236
-							output.write(buff, buffLength);
-							delete[] buff;
+							if (buffLength == 0) break;
+							else {
+								char* buff = new char[buffLength];
+								output.write(buff, buffLength);
+								delete[] buff;
+							}
 						}
+						output.close();
+						cout << "File " << fileName << " da duoc " << User << " upload len Database.\n";
 					}
-					output.close();
-					cout << "File " << fileName << " da duoc " << User << " upload len Database.\n";
 				}
-			}
-<<<<<<< HEAD
-			else if (continueCheck == download) 
-			{
-=======
-			else if (continueCheck == download) {
-				cout << User << " muon download file tu server\n" << endl;
->>>>>>> 0e73a18b019e19b08f5a900188c7b4b037403236
-				DIR* pDIR;
-				struct dirent* entry;
-				if (pDIR = opendir(databasePath)) 
+				else if (continueCheck == download)
 				{
-					while (entry = readdir(pDIR)) 
+					cout << User << " muon download file tu server\n" << endl;
+					DIR* pDIR;
+					struct dirent* entry;
+					if (pDIR = opendir(databasePath))
 					{
-						if (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0) 
+						while (entry = readdir(pDIR))
 						{
-							server.Send(&(entry->d_namlen), sizeof(int), 0);
-							server.Send(&(entry->d_name), entry->d_namlen, 0);
+							if (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0)
+							{
+								server.Send(&(entry->d_namlen), sizeof(int), 0);
+								server.Send(&(entry->d_name), entry->d_namlen, 0);
+							}
 						}
+						int zero = 0; // thoat vong lap ben phia client
+						server.Send(&zero, sizeof(zero), 0);
+						closedir(pDIR);
 					}
-					int zero = 0; // thoat vong lap ben phia client
-					server.Send(&zero, sizeof(zero), 0);
-					closedir(pDIR);
-				}
-				char path[100] = "Database/";
-				char fileName[100];
-				int nameLength = 0;
-<<<<<<< HEAD
-				server.Receive(&nameLength, sizeof(nameLength), 0);
-				server.Receive(fileName, nameLength, 0);
-=======
-				mysock.Receive(&nameLength, sizeof(nameLength), 0);
-				mysock.Receive(fileName, nameLength, 0);
->>>>>>> 0e73a18b019e19b08f5a900188c7b4b037403236
-				fileName[nameLength] = '\0';
-				cout << User << " muon tai file " << fileName << endl;
-				strcat_s(path, fileName);
+					char path[100] = "Database/";
+					char fileName[100];
+					int nameLength = 0;
 
-				ifstream f;
-				bool exist = false;
-				f.open(path, ios::in | ios::binary);
-<<<<<<< HEAD
-				if (f.good())
-				{
-					exist = true;
-					server.Send(&exist, sizeof(exist), 0);
-					int size = 1024 * 1024;
-					char* buff = new char[size];
-					int buffLength = 0;
-					while (!f.eof()) 
+					server.Receive(&nameLength, sizeof(nameLength), 0);
+					server.Receive(fileName, nameLength, 0);
+
+					fileName[nameLength] = '\0';
+					cout << User << " muon tai file " << fileName << endl;
+					strcat_s(path, fileName);
+
+					ifstream f;
+					bool exist = false;
+					f.open(path, ios::in | ios::binary);
+
+					if (f.good())
 					{
-						f.read((char*)buff, size);
-						buffLength = f.gcount();
-						buff[buffLength] = '\0';
+						exist = true;
+						server.Send(&exist, sizeof(exist), 0);
+						int size = 1024 * 1024;
+						char* buff = new char[size];
+						int buffLength = 0;
+						while (!f.eof())
+						{
+							f.read((char*)buff, size);
+							buffLength = f.gcount();
+							buff[buffLength] = '\0';
+							server.Send(&buffLength, sizeof(buffLength), 0);
+							server.Send(buff, buffLength, 0);
+						}
+						delete[] buff;
+						buffLength = 0;
 						server.Send(&buffLength, sizeof(buffLength), 0);
-						server.Send(buff, buffLength, 0);
+						cout << User << " da tai file " << fileName << endl;
 					}
-					delete[] buff;
-					buffLength = 0;
-					server.Send(&buffLength, sizeof(buffLength), 0);
-					cout << User << " da tai file " << fileName << endl;
-				}
-				else 
-				{
-					server.Send(&exist, sizeof(exist), 0);
-=======
-				if (f.good()) {
-					exist = true;
-					mysock.Send(&exist, sizeof(exist), 0);
-					int size = 1024 * 1024;
-					char* buff = new char[size];
-					int buffLength = 0;
-					while (!f.eof()) {
-						f.read((char*)buff, size);
-						buffLength = f.gcount();
-						buff[buffLength] = '\0';
-						mysock.Send(&buffLength, sizeof(buffLength), 0);
-						mysock.Send(buff, buffLength, 0);
+					else
+					{
+						server.Send(&exist, sizeof(exist), 0);
+
+						if (f.good())
+						{
+							exist = true;
+							int size = 1024 * 1024;
+							char* buff = new char[size];
+							int buffLength = 0;
+							while (!f.eof())
+							{
+								f.read((char*)buff, size);
+								buffLength = f.gcount();
+								buff[buffLength] = '\0';
+							}
+							delete[] buff;
+							buffLength = 0;
+							cout << User << " da tai file " << fileName << endl;
+						}
+						else
+						{
+							cout << "Khong ton tai file " << fileName << endl;
+						}
+						f.close();
 					}
-					delete[] buff;
-					buffLength = 0;
-					mysock.Send(&buffLength, sizeof(buffLength), 0);
-					cout << User << " da tai file " << fileName << endl;
+					isOperating = false;
 				}
-				else {
-					mysock.Send(&exist, sizeof(exist), 0);
->>>>>>> 0e73a18b019e19b08f5a900188c7b4b037403236
-					cout << "Khong ton tai file " << fileName << endl;
-				}
-				f.close();
 			}
-			isOperating = false;
 		}
-	} while (continueCheck);
+	}while (continueCheck);
 	cout << User << " da dang xuat" << endl;
 	delete hConnected;
 	return 0;
@@ -381,11 +352,8 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 		else
 		{
 			// TODO: code your application's behavior here.
-<<<<<<< HEAD
+
 			CSocket server, s;
-=======
-			CSocket server,s;
->>>>>>> 0e73a18b019e19b08f5a900188c7b4b037403236
 			AfxSocketInit(NULL);
 			server.Create(port);
 
@@ -404,13 +372,9 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 				//Chuyen doi CSocket thanh Socket
 				*hConnected = s.Detach();
 				//Khoi tao thread tuong ung voi moi client Connect vao server.
-				//Nhu vay moi client se doc lap nhau, khong phai cho doi tung client xu ly rieng
-<<<<<<< HEAD
+
 				threadClient = CreateThread(NULL, 0, threadFunction_handle_each_client, hConnected, 0, &threadID1);
 				i++;
-=======
-				threadStatus = CreateThread(NULL, 0, function_cal, hConnected, 0, &threadID);
->>>>>>> 0e73a18b019e19b08f5a900188c7b4b037403236
 			} while (true);
 		}
 	}
