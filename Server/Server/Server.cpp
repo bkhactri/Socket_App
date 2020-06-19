@@ -259,7 +259,6 @@ Loop:
 				server.Receive(&nameLength, sizeof(nameLength), 0);
 				server.Receive(fileName, nameLength, 0);
 				fileName[nameLength] = '\0';
-				cout << User << " muon tai file " << fileName << endl;
 				strcat_s(path, fileName);
 
 				ifstream f;
@@ -271,10 +270,10 @@ Loop:
 					server.Send(&exist, sizeof(exist), 0);
 
 					char* buff = new char[max_file_size + 1];
-					buff[max_file_size] = '\0';
 					int buffLength = 0;
 					f.read((char*)buff, max_file_size);
 					buffLength = f.gcount();
+					buff[buffLength] = '\0';
 					server.Send((char*)&buffLength, sizeof(buffLength), 0);
 					server.Send((char*)buff, buffLength, 0);
 					delete[] buff;

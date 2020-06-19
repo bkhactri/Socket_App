@@ -218,7 +218,7 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 									client.Send(fileName, length, 0);
 									int buffLength = 0;
 									char* buff = new char[max_file_size + 1];
-									buff[max_file_size] = '\0';
+									//buff[max_file_size] = '\0';
 									f.read((char*)buff, max_file_size);
 									buffLength = f.gcount();
 									buff[buffLength] = '\0';
@@ -248,14 +248,13 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 							int nameLength = 0;
 							while (true)
 							{
-								client.Receive(&nameLength, sizeof(nameLength), 0);
+								client.Receive((char*)&nameLength, sizeof(int), 0);
 								if (nameLength == 0) break;
 								else
 								{
-									client.Receive(fileName, nameLength, 0);
+									client.Receive((char*)fileName, nameLength, 0);
 									fileName[nameLength] = '\0';
 									cout << fileName << endl;
-					
 								}
 							}
 							cout << "Nhap ten file muon download: ";
@@ -267,16 +266,16 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 							client.Send(fileName, nameLength, 0);
 
 							bool exist = false;
-							client.Receive(&exist, sizeof(exist), 0);
+							client.Receive((char*)&exist, sizeof(bool), 0);
 							if (exist == true)
 							{
 								int buffLength = 0;
 								fstream output;
 								output.open(fileName, ios::out | ios::binary);
-								client.Receive((char*)&buffLength, sizeof(buffLength), 0);
+								client.Receive((char*)&buffLength, sizeof(int), 0);
 								char* buff = new char[buffLength + 1];
-								buff[buffLength] = '\0';
 								client.Receive((char*)buff, buffLength, 0);
+								buff[buffLength] = '\0';
 								output.write(buff, buffLength);
 								delete[] buff;
 								output.close();
