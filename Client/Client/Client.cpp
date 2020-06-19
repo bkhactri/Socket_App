@@ -37,12 +37,11 @@ void handleClose()
 DWORD WINAPI threadFunction_handle_server_connected(LPVOID arg)
 {
 	unsigned int port1 = 1235;
-	int flag;
+	int flag = 0;
 	HMODULE hModule = ::GetModuleHandle(NULL);
 	CSocket client;
 	AfxSocketInit(NULL);
 	client.Create();
-
 	if (client.Connect(CA2W(sAdd), port1))
 	{
 		do
@@ -57,7 +56,7 @@ DWORD WINAPI threadFunction_handle_server_connected(LPVOID arg)
 		cout << "\n------- Server da gap loi hoac Server da tat -------" << endl;
 		cout << "------------------ Hen gap lai ---------------------" << endl;
 	}
-	
+
 	client.Close();
 	cout << "Nhan ENTER de thoat" << endl;
 	handleClose();
@@ -66,6 +65,8 @@ DWORD WINAPI threadFunction_handle_server_connected(LPVOID arg)
 
 int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 {
+
+	int x = 1, y = 1;
 	int correct = 0, continueCheck = 0, choice;
 	int nRetCode = 0;
 	DWORD threadID;
@@ -85,13 +86,12 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 		{
 			// TODO: code your application's behavior here.
 			CSocket client;
-			char sAdd[1000];
 			AfxSocketInit(NULL);
 
 			//Tao socket
 			client.Create();
 
-			// Nhap dic chi IP cua server
+			// Nhap dia chi IP cua server
 			cout << "Nhap dia chi IP cua server: ";
 			gets_s(sAdd);
 
@@ -193,7 +193,7 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 					client.Send(&continueCheck, sizeof(continueCheck), 0);
 					bool isServerOperating = false;
 					client.Receive(&isServerOperating, sizeof(isServerOperating), 0);
-					if (isServerOperating == false) 
+					if (isServerOperating == false)
 					{
 						if (continueCheck == upload)
 						{
@@ -211,7 +211,7 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 								exist = true;
 								client.Send(&exist, sizeof(exist), 0);
 								int s = fileSize(fileName);
-								if (s <= max_file_size) 
+								if (s <= max_file_size)
 								{
 									// cout << "Dung luong: " << s << " bytes" << endl;
 									client.Send(&length, sizeof(length), 0);
@@ -219,7 +219,7 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 									int size = 1024 * 1024;
 									char* buff = new char[size];
 									int buffLength = 0;
-									while (!f.eof()) 
+									while (!f.eof())
 									{
 										f.read((char*)buff, size);
 										buffLength = f.gcount();
@@ -238,23 +238,23 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 									cout << "Dung luong thuc te cua file " << double(s) / (pow(1024, 2.0)) << "MB" << endl;
 								}
 							}
-							else 
+							else
 							{
 								client.Send(&exist, sizeof(exist), 0);
 								cout << "\nKhong ton tai ten file.\n";
 							}
 							f.close();
 						}
-						else if (continueCheck == download) 
+						else if (continueCheck == download)
 						{
 							cout << "Danh sach file ton tai tren database cua server:\n";
 							char fileName[100];
 							int nameLength = 0;
-							while (true) 
+							while (true)
 							{
 								client.Receive(&nameLength, sizeof(nameLength), 0);
 								if (nameLength == 0) break;
-								else 
+								else
 								{
 									client.Receive(fileName, nameLength, 0);
 									fileName[nameLength] = '\0';
@@ -276,11 +276,11 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 								fstream output;
 								output.open(fileName, ios::out | ios::binary);
 								int buffLength = 0; // do dai doan bin moi lan gui
-								while (true) 
+								while (true)
 								{
 									client.Receive(&buffLength, sizeof(buffLength), 0);
 									if (buffLength == 0) break;
-									else 
+									else
 									{
 										char* buff = new char[buffLength];
 										client.Receive(buff, buffLength, 0);
@@ -291,7 +291,7 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 								output.close();
 								cout << "Da download file thanh cong.\n";
 							}
-							else 
+							else
 							{
 								cout << "Khong ton tai file tren server.\n";
 							}
@@ -312,9 +312,9 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 	}
 	else
 	{
-	// TODO: change error code to suit your needs
-	_tprintf(_T("Fatal Error: GetModuleHandle failed\n"));
-	nRetCode = 1;
+		// TODO: change error code to suit your needs
+		_tprintf(_T("Fatal Error: GetModuleHandle failed\n"));
+		nRetCode = 1;
 	}
 	return nRetCode;
 }

@@ -14,8 +14,7 @@ using namespace std;
 #define new DEBUG_NEW
 #endif
 
-int fileSize(char* path)
-{
+int fileSize(char* path) {
 	ifstream f(path, ios::binary);
 	f.seekg(0, ios::end);
 	int file_size = f.tellg();
@@ -24,8 +23,7 @@ int fileSize(char* path)
 	return file_size;
 }
 
-void duplicateFile(char* path, char* fileName, int dotPos, int& count) 
-{
+void duplicateFile(char* path, char* fileName, int dotPos, int& count) {
 	DIR* pDIR;
 	struct dirent* entry;
 	if (pDIR = opendir(databasePath)) {
@@ -93,10 +91,9 @@ DWORD WINAPI threadFunction_stop(LPVOID arg)
 		if (status == 1)
 		{
 			cout << "Server da ngat ket noi" << endl;
-			break;
+			exit(0);
 		}
 	} while (true);
-	exit(0);
 	return 0;
 }
 
@@ -192,7 +189,7 @@ Loop:
 		goto Loop;
 	}
 
-	do 
+	do
 	{
 		//Nhan check value xem client co tiep tuc hay khong
 		server.Receive(&continueCheck, sizeof(continueCheck), 0);
@@ -200,12 +197,12 @@ Loop:
 		if (isOperating == false)
 		{
 			isOperating = true;
-			if (continueCheck == upload) 
+			if (continueCheck == upload)
 			{
 				isOperating = true;
 				bool exist = false;
 				server.Receive(&exist, sizeof(exist), 0);
-				if (exist == true) 
+				if (exist == true)
 				{
 					char fileName[100];
 					char path[100] = "Database/";
@@ -225,11 +222,11 @@ Loop:
 					output.open(path, ios::out | ios::binary);
 					int buffLength = 0; // do dai doan bin moi lan gui
 
-					while (true) 
+					while (true)
 					{
 						server.Receive(&buffLength, sizeof(buffLength), 0);
 						if (buffLength == 0) break;
-						else 
+						else
 						{
 							char* buff = new char[buffLength];
 							server.Receive(buff, buffLength, 0);
@@ -241,15 +238,15 @@ Loop:
 					cout << "File " << fileName << " da duoc " << User << " upload len Database.\n";
 				}
 			}
-			else if (continueCheck == download) 
+			else if (continueCheck == download)
 			{
 				DIR* pDIR;
 				struct dirent* entry;
-				if (pDIR = opendir(databasePath)) 
+				if (pDIR = opendir(databasePath))
 				{
-					while (entry = readdir(pDIR)) 
+					while (entry = readdir(pDIR))
 					{
-						if (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0) 
+						if (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0)
 						{
 							server.Send(&(entry->d_namlen), sizeof(int), 0);
 							server.Send(&(entry->d_name), entry->d_namlen, 0);
@@ -271,14 +268,14 @@ Loop:
 				ifstream f;
 				bool exist = false;
 				f.open(path, ios::in | ios::binary);
-				if (f.good()) 
+				if (f.good())
 				{
 					exist = true;
 					server.Send(&exist, sizeof(exist), 0);
 					int size = 1024 * 1024;
 					char* buff = new char[size];
 					int buffLength = 0;
-					while (!f.eof()) 
+					while (!f.eof())
 					{
 						f.read((char*)buff, size);
 						buffLength = f.gcount();
@@ -291,7 +288,7 @@ Loop:
 					server.Send(&buffLength, sizeof(buffLength), 0);
 					cout << User << " da tai file " << fileName << endl;
 				}
-				else 
+				else
 				{
 					server.Send(&exist, sizeof(exist), 0);
 					cout << "Khong ton tai file " << fileName << endl;
@@ -310,7 +307,7 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 {
 	long long int i = 1;
 	int nRetCode = 0;
-	DWORD threadID1, threadID2,threadID3;
+	DWORD threadID1, threadID2, threadID3;
 	HANDLE threadClient, threadStopEachClient, threadStop;
 	HMODULE hModule = ::GetModuleHandle(NULL);
 	if (hModule != NULL)
