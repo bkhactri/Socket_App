@@ -14,7 +14,8 @@ using namespace std;
 #define new DEBUG_NEW
 #endif
 
-int fileSize(char* path) {
+int fileSize(char* path)
+{
 	ifstream f(path, ios::binary);
 	f.seekg(0, ios::end);
 	int file_size = f.tellg();
@@ -23,7 +24,8 @@ int fileSize(char* path) {
 	return file_size;
 }
 
-void duplicateFile(char* path, char* fileName, int dotPos, int& count) {
+void duplicateFile(char* path, char* fileName, int dotPos, int& count) 
+{
 	DIR* pDIR;
 	struct dirent* entry;
 	if (pDIR = opendir(databasePath)) {
@@ -91,9 +93,10 @@ DWORD WINAPI threadFunction_stop(LPVOID arg)
 		if (status == 1)
 		{
 			cout << "Server da ngat ket noi" << endl;
-			exit(0);
+			break;
 		}
 	} while (true);
+	exit(0);
 	return 0;
 }
 

@@ -11,11 +11,6 @@ using namespace std;
 
 
 
-#define port 1234
-#define upload 1
-#define download 2
-#define max_file_size 1024 * 1024 * 200
-
 static int status = 0;
 
 const char databasePath[] = "Database";

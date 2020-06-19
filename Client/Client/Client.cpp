@@ -37,17 +37,18 @@ void handleClose()
 DWORD WINAPI threadFunction_handle_server_connected(LPVOID arg)
 {
 	unsigned int port1 = 1235;
-	int flag = 0;
+	int flag;
 	HMODULE hModule = ::GetModuleHandle(NULL);
 	CSocket client;
 	AfxSocketInit(NULL);
 	client.Create();
+
 	if (client.Connect(CA2W(sAdd), port1))
 	{
 		do
 		{
 			client.Receive((char*)&flag, sizeof(int), 0);
-			if (flag ==1 || flag == 0)
+			if (flag == 1 || flag == 0)
 			{
 				break;
 			}

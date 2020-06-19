@@ -15,5 +15,4 @@ void handleClose();
 char sAdd[1000];
 int fileSize(char* path);
 
-int fileSize(char* path);
 
