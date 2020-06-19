@@ -26,9 +26,12 @@ int fileSize(char* path) {
 void duplicateFile(char* path, char* fileName, int dotPos, int& count) {
 	DIR* pDIR;
 	struct dirent* entry;
-	if (pDIR = opendir(databasePath)) {
-		while (entry = readdir(pDIR)) {
-			if (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0) {
+	if (pDIR = opendir(databasePath))
+	{
+		while (entry = readdir(pDIR)) 
+		{
+			if (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0) 
+			{
 				if (strcmp(fileName, entry->d_name) == 0) {
 					// Lay vi tri '.'
 					int length = strlen(fileName);
@@ -110,6 +113,7 @@ DWORD WINAPI threadFunction_stop_each_client(LPVOID arg)
 	handleClose();
 	flag = 1;
 	s.Send(&flag, sizeof(flag), 0);
+	server.Close();
 	status = 1;
 	return 0;
 }
@@ -207,6 +211,7 @@ Loop:
 					char fileName[100];
 					char path[100] = "Database/";
 					int length = 0;
+					char* buff;
 
 					// tao path "Database/fileName"
 					server.Receive(&length, sizeof(length), 0);
@@ -221,19 +226,13 @@ Loop:
 					fstream output;
 					output.open(path, ios::out | ios::binary);
 					int buffLength = 0; // do dai doan bin moi lan gui
-
-					while (true)
-					{
-						server.Receive(&buffLength, sizeof(buffLength), 0);
-						if (buffLength == 0) break;
-						else
-						{
-							char* buff = new char[buffLength];
-							server.Receive(buff, buffLength, 0);
-							output.write(buff, buffLength);
-							delete[] buff;
-						}
-					}
+					server.Receive((char*)&buffLength, sizeof(int), 0);
+					cout << buffLength << endl;
+					buff = new char[buffLength + 1];
+					buff[buffLength] = '\0';
+					server.Receive((char*)buff, buffLength, 0);
+					output.write(buff, buffLength);
+					delete[] buff;
 					output.close();
 					cout << "File " << fileName << " da duoc " << User << " upload len Database.\n";
 				}
@@ -272,20 +271,16 @@ Loop:
 				{
 					exist = true;
 					server.Send(&exist, sizeof(exist), 0);
-					int size = 1024 * 1024;
-					char* buff = new char[size];
+
+					char* buff = new char[max_file_size + 1];
+					buff[max_file_size] = '\0';
 					int buffLength = 0;
-					while (!f.eof())
-					{
-						f.read((char*)buff, size);
-						buffLength = f.gcount();
-						buff[buffLength] = '\0';
-						server.Send(&buffLength, sizeof(buffLength), 0);
-						server.Send(buff, buffLength, 0);
-					}
+					f.read((char*)buff, max_file_size);
+					buffLength = f.gcount();
+					buff[buffLength] = '\0';
+					server.Send((char*)&buffLength, sizeof(buffLength), 0);
+					server.Send((char*)buff, buffLength, 0);
 					delete[] buff;
-					buffLength = 0;
-					server.Send(&buffLength, sizeof(buffLength), 0);
 					cout << User << " da tai file " << fileName << endl;
 				}
 				else

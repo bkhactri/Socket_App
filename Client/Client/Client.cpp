@@ -216,20 +216,16 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 									// cout << "Dung luong: " << s << " bytes" << endl;
 									client.Send(&length, sizeof(length), 0);
 									client.Send(fileName, length, 0);
-									int size = 1024 * 1024;
-									char* buff = new char[size];
 									int buffLength = 0;
-									while (!f.eof())
-									{
-										f.read((char*)buff, size);
-										buffLength = f.gcount();
-										buff[length] = '\0';
-										client.Send(&buffLength, sizeof(buffLength), 0);
-										client.Send(buff, buffLength, 0);
-									}
-									delete[] buff;
-									buffLength = 0;
+									char* buff = new char[max_file_size + 1];
+									buff[max_file_size] = '\0';
+									f.read((char*)buff, max_file_size);
+									buffLength = f.gcount();
+									buff[buffLength] = '\0';
 									client.Send(&buffLength, sizeof(buffLength), 0);
+									client.Send(buff, buffLength, 0);
+									delete[] buff;
+
 									cout << "File " << fileName << " da duoc upload len server.\n";
 								}
 								else
@@ -273,21 +269,15 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 							client.Receive(&exist, sizeof(exist), 0);
 							if (exist == true)
 							{
+								int buffLength = 0;
 								fstream output;
 								output.open(fileName, ios::out | ios::binary);
-								int buffLength = 0; // do dai doan bin moi lan gui
-								while (true)
-								{
-									client.Receive(&buffLength, sizeof(buffLength), 0);
-									if (buffLength == 0) break;
-									else
-									{
-										char* buff = new char[buffLength];
-										client.Receive(buff, buffLength, 0);
-										output.write(buff, buffLength);
-										delete[] buff;
-									}
-								}
+								client.Receive((char*)&buffLength, sizeof(buffLength), 0);		
+								char* buff = new char[buffLength + 1];
+								buff[buffLength] = '\0';
+								client.Receive((char*)buff, buffLength, 0);
+								output.write(buff, buffLength);
+								delete[] buff;
 								output.close();
 								cout << "Da download file thanh cong.\n";
 							}
