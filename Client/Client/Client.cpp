@@ -255,6 +255,7 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 									client.Receive(fileName, nameLength, 0);
 									fileName[nameLength] = '\0';
 									cout << fileName << endl;
+					
 								}
 							}
 							cout << "Nhap ten file muon download: ";
@@ -272,7 +273,7 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 								int buffLength = 0;
 								fstream output;
 								output.open(fileName, ios::out | ios::binary);
-								client.Receive((char*)&buffLength, sizeof(buffLength), 0);		
+								client.Receive((char*)&buffLength, sizeof(buffLength), 0);
 								char* buff = new char[buffLength + 1];
 								buff[buffLength] = '\0';
 								client.Receive((char*)buff, buffLength, 0);

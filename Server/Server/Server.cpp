@@ -28,9 +28,9 @@ void duplicateFile(char* path, char* fileName, int dotPos, int& count) {
 	struct dirent* entry;
 	if (pDIR = opendir(databasePath))
 	{
-		while (entry = readdir(pDIR)) 
+		while (entry = readdir(pDIR))
 		{
-			if (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0) 
+			if (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0)
 			{
 				if (strcmp(fileName, entry->d_name) == 0) {
 					// Lay vi tri '.'
@@ -113,7 +113,6 @@ DWORD WINAPI threadFunction_stop_each_client(LPVOID arg)
 	handleClose();
 	flag = 1;
 	s.Send(&flag, sizeof(flag), 0);
-	server.Close();
 	status = 1;
 	return 0;
 }
@@ -196,7 +195,7 @@ Loop:
 	do
 	{
 		//Nhan check value xem client co tiep tuc hay khong
-		server.Receive(&continueCheck, sizeof(continueCheck), 0);
+		server.Receive((char*)&continueCheck, sizeof(int), 0);
 		server.Send(&isOperating, sizeof(isOperating), 0);
 		if (isOperating == false)
 		{
@@ -227,10 +226,9 @@ Loop:
 					output.open(path, ios::out | ios::binary);
 					int buffLength = 0; // do dai doan bin moi lan gui
 					server.Receive((char*)&buffLength, sizeof(int), 0);
-					cout << buffLength << endl;
 					buff = new char[buffLength + 1];
-					buff[buffLength] = '\0';
 					server.Receive((char*)buff, buffLength, 0);
+					buff[buffLength] = '\0';
 					output.write(buff, buffLength);
 					delete[] buff;
 					output.close();
@@ -277,7 +275,6 @@ Loop:
 					int buffLength = 0;
 					f.read((char*)buff, max_file_size);
 					buffLength = f.gcount();
-					buff[buffLength] = '\0';
 					server.Send((char*)&buffLength, sizeof(buffLength), 0);
 					server.Send((char*)buff, buffLength, 0);
 					delete[] buff;
