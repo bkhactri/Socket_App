@@ -233,12 +233,11 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 									client.Send(fileName, length, 0);
 									int buffLength = 0;
 									char* buff = new char[max_file_size + 1];
-									//buff[max_file_size] = '\0';
 									f.read((char*)buff, max_file_size);
 									buffLength = f.gcount();
 									buff[buffLength] = '\0';
-									client.Send(&buffLength, sizeof(buffLength), 0);
-									client.Send(buff, buffLength, 0);
+									client.Send((char*)&buffLength, sizeof(buffLength), 0);
+									client.Send((char*)buff, buffLength, 0);
 									delete[] buff;
 
 									cout << "File " << fileName << " da duoc upload len server.\n";
@@ -282,9 +281,9 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 
 							bool exist = false;
 							client.Receive((char*)&exist, sizeof(bool), 0);
+							int buffLength = 0;
 							if (exist == true)
 							{
-								int buffLength = 0;
 								fstream output;
 								output.open(fileName, ios::out | ios::binary);
 								client.Receive((char*)&buffLength, sizeof(int), 0);

@@ -266,8 +266,6 @@ Loop:
 					char fileName[100];
 					char path[100] = "Database/";
 					int length = 0;
-					char* buff;
-
 					// tao path "Database/fileName"
 					server.Receive(&length, sizeof(length), 0);
 					server.Receive(fileName, length, 0);
@@ -282,7 +280,7 @@ Loop:
 					output.open(path, ios::out | ios::binary);
 					int buffLength = 0; // do dai doan bin moi lan gui
 					server.Receive((char*)&buffLength, sizeof(int), 0);
-					buff = new char[buffLength + 1];
+					char* buff = new char[buffLength + 1];
 					server.Receive((char*)buff, buffLength, 0);
 					buff[buffLength] = '\0';
 					output.write(buff, buffLength);
@@ -324,7 +322,6 @@ Loop:
 				{
 					exist = true;
 					server.Send(&exist, sizeof(exist), 0);
-
 					char* buff = new char[max_file_size + 1];
 					int buffLength = 0;
 					f.read((char*)buff, max_file_size);
@@ -334,6 +331,7 @@ Loop:
 					server.Send((char*)buff, buffLength, 0);
 					delete[] buff;
 					cout << User << " da tai file " << fileName << endl;
+					f.seekg(0, ios::beg);
 				}
 				else
 				{
@@ -342,9 +340,10 @@ Loop:
 				}
 				f.close();
 			}
-			isOperating = false;
+			
 		}
 		continueCheck = 99;
+		isOperating = false;
 	} while (continueCheck != 0);
 	status = 3;
 	strcpy(UserC, User);
