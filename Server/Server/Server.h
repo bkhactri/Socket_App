@@ -12,10 +12,12 @@ using namespace std;
 
 
 static int status = 0;
-
 const char databasePath[] = "Database";
 bool isOperating = false;
+char UserC[100];
+
+
 int fileSize(char* path);
 int Check(char check[100], char right[100]);
 void duplicateFile(char* path, char* fileName, int dotPos, int& count);
-void handleClose();
+int handleClose();

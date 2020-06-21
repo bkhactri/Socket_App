@@ -24,21 +24,14 @@ int fileSize(char* path) {
 	return file_size;
 }
 
-void handleClose()
-{
-	int bESCPressed = 0;
-	do
-	{
-		bESCPressed = (_getch() == 13);
-	} while (!bESCPressed);
-	exit(0);
-}
 
 DWORD WINAPI threadFunction_handle_server_connected(LPVOID arg)
 {
 	unsigned int port1 = 1235;
 	int flag = 0;
-	HMODULE hModule = ::GetModuleHandle(NULL);
+	int size;
+	char* UserC;
+	//HMODULE hModule = ::GetModuleHandle(NULL);
 	CSocket client;
 	AfxSocketInit(NULL);
 	client.Create();
@@ -46,20 +39,42 @@ DWORD WINAPI threadFunction_handle_server_connected(LPVOID arg)
 	{
 		do
 		{
+			fflush(stdin);
 			client.Receive((char*)&flag, sizeof(int), 0);
 			if (flag == 1 || flag == 0)
 			{
-				break;
+				cout << "\n------- Server da gap loi hoac Server da tat -------" << endl;
+				cout << "------------------ Hen gap lai ---------------------" << endl;
+				client.Close();
+				cout << "Nhan ENTER de thoat" << endl;
+				exit(0);
+			}
+			else if (flag == 2)
+			{
+				//Nhan kich thuoc tai khoan tu client
+				client.Receive((char*)&size, sizeof(int), 0); // Neu nhan loi thi tra ve la SOCKET_ERROR.
+				UserC = new char[size + 1];
+				//Nhan tai khoan
+				client.Receive((char*)UserC, size, 0);
+				UserC[size] = '\0';
+				cout << UserC << " da dang nhap" << endl;
+				flag = 0;
+			}
+			else if (flag == 3)
+			{
+				//Nhan kich thuoc tai khoan tu client
+				client.Receive((char*)&size, sizeof(int), 0); // Neu nhan loi thi tra ve la SOCKET_ERROR.
+				UserC = new char[size + 1];
+				//Nhan tai khoan
+				client.Receive((char*)UserC, size, 0);
+				UserC[size] = '\0';
+				cout << UserC << " da dang xuat" << endl;
+				flag = 0;
 			}
 		} while (1);
-
-		cout << "\n------- Server da gap loi hoac Server da tat -------" << endl;
-		cout << "------------------ Hen gap lai ---------------------" << endl;
+		cin.clear();
+		cin.ignore();
 	}
-
-	client.Close();
-	cout << "Nhan ENTER de thoat" << endl;
-	handleClose();
 	return 0;
 }
 
@@ -180,7 +195,7 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 				}
 
 			Continue:
-				cout << "Client da ket noi toi server" << endl;
+				cout << "\nClient da ket noi toi server" << endl;
 				do
 				{
 					cout << "Moi lua chon tac vu" << endl;

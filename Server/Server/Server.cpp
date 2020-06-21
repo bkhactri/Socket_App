@@ -78,23 +78,68 @@ int Check(char C[100], char R[100])
 	}
 }
 
-void handleClose()
+int handleClose()
 {
 	int bESCPressed = 0;
 	do
 	{
 		bESCPressed = (_getch() == 27);
 	} while (!bESCPressed);
+
+	return 1;
 }
 
-DWORD WINAPI threadFunction_stop(LPVOID arg)
+DWORD WINAPI threadFunction_send_flag(LPVOID arg)
 {
+	int flag = 0;
+	int size;
+	SOCKET* hConnected = (SOCKET*)arg;
+	CSocket server;
+	//Chuyen ve lai CSocket
+	server.Attach(*hConnected);
 	do
 	{
 		if (status == 1)
 		{
+			flag = 1;
+			server.Send(&flag, sizeof(flag), 0);
+		}
+		else if (status == 2)
+		{
+			flag = 2;
+			server.Send(&flag, sizeof(flag), 0);
+			size = strlen(UserC);
+			server.Send(&size, sizeof(size), 0);
+			// Gui di tai khoan voi do dai la size
+			server.Send(UserC, size, 0);
+			status = 0;
+		}
+		else if (status == 3)
+		{
+			flag = 3;
+			server.Send(&flag, sizeof(flag), 0);
+			size = strlen(UserC);
+			server.Send(&size, sizeof(size), 0);
+			// Gui di tai khoan voi do dai laUsize
+			server.Send(UserC, size, 0);
+			status = 0;
+		}
+	} while (flag != 1);
+
+	exit(0);
+	cin.clear();
+	cin.ignore();
+	return 0;
+}
+
+DWORD WINAPI threadFunction_stop_key(LPVOID arg)
+{
+	do
+	{
+		if (handleClose() == 1)
+		{
+			status = 1;
 			cout << "Server da ngat ket noi" << endl;
-			exit(0);
 		}
 	} while (true);
 	return 0;
@@ -102,23 +147,30 @@ DWORD WINAPI threadFunction_stop(LPVOID arg)
 
 DWORD WINAPI threadFunction_stop_each_client(LPVOID arg)
 {
-	int flag;
+	int i = 0;
+	DWORD threadID1;
+	HANDLE threadClient;
 	unsigned int port1 = 1235;
-	HMODULE hModule = ::GetModuleHandle(NULL);
 	CSocket server, s;
 	AfxSocketInit(NULL);
 	server.Create(port1);
-	server.Listen();
-	server.Accept(s);
-	handleClose();
-	flag = 1;
-	s.Send(&flag, sizeof(flag), 0);
-	status = 1;
+	do
+	{
+		server.Listen();
+		server.Accept(s);
+		SOCKET* hConnected = new SOCKET();
+		//Chuyen doi CSocket thanh Socket
+		*hConnected = s.Detach();
+		//Khoi tao thread tuong ung voi moi client Connect vao server.
+		threadClient = CreateThread(NULL, 0, threadFunction_send_flag, hConnected, 0, &threadID1);
+	} while (true);
+
 	return 0;
 }
 
 DWORD WINAPI threadFunction_handle_each_client(LPVOID arg)
 {
+	int LogStatus = 0;
 	SOCKET* hConnected = (SOCKET*)arg;
 	CSocket server;
 	//Chuyen ve lai CSocket
@@ -162,6 +214,9 @@ Loop:
 			{
 				correct = 1;
 				cout << User << " da dang nhap" << endl;
+				status = 2;
+				strcpy(UserC, User);
+				LogStatus = 1;
 				break;
 			}
 			if (choice == 2)
@@ -180,6 +235,7 @@ Loop:
 	else if (correct == 0 && choice == 2)
 	{
 		cout << User << " da tao tai khoan thanh cong" << endl;
+		LogStatus = 1;
 		f.open("User.bin", ios::app);
 		if (f.fail()) { return 0; }
 		f << User << endl;
@@ -282,14 +338,24 @@ Loop:
 				else
 				{
 					server.Send(&exist, sizeof(exist), 0);
-					cout << "Khong ton tai file " << fileName << endl;
+					cout << User << " donwnload file khong ton tai" << endl;
 				}
 				f.close();
 			}
 			isOperating = false;
 		}
-	} while (continueCheck);
-	cout << User << " da dang xuat" << endl;
+		continueCheck = 99;
+	} while (continueCheck != 0);
+	status = 3;
+	strcpy(UserC, User);
+	if (LogStatus == 0)
+	{
+		cout << "Unknown client da dang xuat" << endl;
+	}
+	else if (LogStatus == 1)
+	{
+		cout << User << " da dang xuat" << endl;
+	}
 	delete hConnected;
 	return 0;
 }
@@ -313,17 +379,17 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 		else
 		{
 			// TODO: code your application's behavior here.
-
 			CSocket server, joiner;
 			AfxSocketInit(NULL);
 			server.Create(port);
 
 			//Khoi tao thread de nam bat su kien server bi van de
 			cout << "Nhan ESC de release moi Client va tat Server" << endl;
-			threadStop = CreateThread(NULL, 0, threadFunction_stop, NULL, 0, &threadID2);
+			threadStop = CreateThread(NULL, 0, threadFunction_stop_key, NULL, 0, &threadID3);
+			threadStopEachClient = CreateThread(NULL, 0, threadFunction_stop_each_client, NULL, 0, &threadID2);
 			do
 			{
-				threadStopEachClient = CreateThread(NULL, 0, threadFunction_stop_each_client, NULL, 0, &threadID2);
+				//threadStopEachClient = CreateThread(NULL, 0, threadFunction_stop_each_client, NULL, 0, &threadID2);
 				Sleep(15);
 				cout << "S" << "[" << i << "]" << ": Server lang nghe ket noi tu client" << endl;
 				server.Listen();
