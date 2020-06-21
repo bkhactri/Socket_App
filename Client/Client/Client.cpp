@@ -49,6 +49,7 @@ DWORD WINAPI threadFunction_handle_server_connected(LPVOID arg)
 				cout << "Nhan ENTER de thoat" << endl;
 				exit(0);
 			}
+
 			else if (flag == 2)
 			{
 				//Nhan kich thuoc tai khoan tu client
@@ -232,12 +233,12 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 									client.Send(&length, sizeof(length), 0);
 									client.Send(fileName, length, 0);
 									int buffLength = 0;
-									char* buff = new char[max_file_size + 1];
+									unsigned char* buff = new unsigned char[max_file_size + 1];
 									f.read((char*)buff, max_file_size);
 									buffLength = f.gcount();
 									buff[buffLength] = '\0';
-									client.Send((char*)&buffLength, sizeof(buffLength), 0);
-									client.Send((char*)buff, buffLength, 0);
+									client.Send(&buffLength, sizeof(buffLength), 0);
+									client.Send(buff, buffLength, 0);
 									delete[] buff;
 
 									cout << "File " << fileName << " da duoc upload len server.\n";

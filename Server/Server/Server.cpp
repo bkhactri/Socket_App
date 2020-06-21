@@ -310,8 +310,8 @@ Loop:
 				char path[100] = "Database/";
 				char fileName[100];
 				int nameLength = 0;
-				server.Receive(&nameLength, sizeof(nameLength), 0);
-				server.Receive(fileName, nameLength, 0);
+				server.Receive((char*)&nameLength, sizeof(nameLength), 0);
+				server.Receive((char*)fileName, nameLength, 0);
 				fileName[nameLength] = '\0';
 				strcat_s(path, fileName);
 
@@ -323,12 +323,15 @@ Loop:
 					exist = true;
 					server.Send(&exist, sizeof(exist), 0);
 					char* buff = new char[max_file_size + 1];
+					for (int i = 0; i < max_file_size; i++) {
+						buff[i] = '\0';
+					}
 					int buffLength = 0;
 					f.read((char*)buff, max_file_size);
 					buffLength = f.gcount();
 					buff[buffLength] = '\0';
-					server.Send((char*)&buffLength, sizeof(buffLength), 0);
-					server.Send((char*)buff, buffLength, 0);
+					server.Send(&buffLength, sizeof(buffLength), 0);
+					server.Send(buff, buffLength, 0);
 					delete[] buff;
 					cout << User << " da tai file " << fileName << endl;
 					f.seekg(0, ios::beg);
