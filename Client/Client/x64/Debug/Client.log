@@ -1,0 +1,20 @@
+﻿  Client.cpp
+C:\Users\Admin\Desktop\Socket_App-master\Client\Client\Client.cpp(28,14): warning C4838: conversion from 'int' to 'SHORT' requires a narrowing conversion
+C:\Users\Admin\Desktop\Socket_App-master\Client\Client\Client.cpp(28,17): warning C4838: conversion from 'int' to 'SHORT' requires a narrowing conversion
+C:\Users\Admin\Desktop\Socket_App-master\Client\Client\Client.cpp(50,21): warning C4309: '=': truncation of constant value
+C:\Users\Admin\Desktop\Socket_App-master\Client\Client\Client.cpp(51,41): warning C4309: '=': truncation of constant value
+C:\Users\Admin\Desktop\Socket_App-master\Client\Client\Client.cpp(52,37): warning C4309: '=': truncation of constant value
+C:\Users\Admin\Desktop\Socket_App-master\Client\Client\Client.cpp(53,14): warning C4309: '=': truncation of constant value
+C:\Users\Admin\Desktop\Socket_App-master\Client\Client\Client.cpp(57,21): warning C4309: '=': truncation of constant value
+C:\Users\Admin\Desktop\Socket_App-master\Client\Client\Client.cpp(58,41): warning C4309: '=': truncation of constant value
+C:\Users\Admin\Desktop\Socket_App-master\Client\Client\Client.cpp(59,37): warning C4309: '=': truncation of constant value
+C:\Users\Admin\Desktop\Socket_App-master\Client\Client\Client.cpp(60,14): warning C4309: '=': truncation of constant value
+C:\Users\Admin\Desktop\Socket_App-master\Client\Client\Client.cpp(64,67): warning C4309: '=': truncation of constant value
+C:\Users\Admin\Desktop\Socket_App-master\Client\Client\Client.cpp(42,7): warning C4101: 'c': unreferenced local variable
+C:\Users\Admin\Desktop\Socket_App-master\Client\Client\Client.cpp(180,16): warning C4244: 'initializing': conversion from 'std::streamoff' to 'int', possible loss of data
+C:\Users\Admin\Desktop\Socket_App-master\Client\Client\Client.cpp(317,26): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\Admin\Desktop\Socket_App-master\Client\Client\Client.cpp(318,30): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\Admin\Desktop\Socket_App-master\Client\Client\Client.cpp(406,37): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\Admin\Desktop\Socket_App-master\Client\Client\Client.cpp(424,32): warning C4244: '=': conversion from 'std::streamsize' to 'int', possible loss of data
+C:\Users\Admin\Desktop\Socket_App-master\Client\Client\Client.cpp(476,36): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+  Client.vcxproj -> C:\Users\Admin\Desktop\Socket_App-master\Client\x64\Debug\Client.exe

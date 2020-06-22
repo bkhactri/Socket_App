@@ -241,9 +241,9 @@ DWORD WINAPI threadFunction_handle_server_connected(LPVOID arg)
 				flag = 0;
 			}
 		} while (1);
-		
+
 	}
-	
+
 	return 0;
 }
 
@@ -378,6 +378,7 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 
 				do
 				{
+
 					printStringXY("Moi lua chon tac vu\n", 1);
 					printStringXY("1.Upload file len server\n", 1);
 					printStringXY("2.Download file tu server\n", 1);
@@ -385,17 +386,17 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 					printStringXY("Choice: ", 1);
 					cin >> continueCheck;
 					printStringXY("\n", 1);
-					
+
 					client.Send(&continueCheck, sizeof(continueCheck), 0);
 					if (continueCheck == upload)
 					{
 						bool isServerOperating;
 						client.Receive(&isServerOperating, sizeof(isServerOperating), 0);
-						if (isServerOperating == true) 
+						if (isServerOperating == true)
 						{
 							printStringXY("\nServer dang ban, hay thu hien thao tac sau.\n", 1);
 						}
-						else 
+						else
 						{
 							printStringXY("\nNhap ten file muon upload: ", 1);
 							char fileName[100];
@@ -504,10 +505,8 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 							printStringXY("Khong ton tai file tren server.\n", 1);
 						}
 					}
-					continueCheck = 99;
 					Sleep(2000);
 					clearCol(1);
-
 				} while (continueCheck != 0);
 				// Dong ket noi
 				client.Close();

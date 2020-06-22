@@ -298,6 +298,7 @@ DWORD WINAPI threadFunction_send_flag(LPVOID arg)
 		}
 		else if (status == 3)
 		{
+
 			flag = 3;
 			server.Send(&flag, sizeof(flag), 0);
 			size = strlen(UserC);
@@ -433,17 +434,26 @@ Loop:
 		correct = 0;
 		goto Loop;
 	}
-
+	int deadLoopCount = 0;
+	bool printed = false;
 	do
 	{
 		//Nhan check value xem client co tiep tuc hay khong
 		server.Receive((char*)&continueCheck, sizeof(int), 0);
-		
+		if (continueCheck == 99) {
+			printed = true;
+			deadLoopCount++;
+			if (deadLoopCount == 100) break;
+		}
+		else {
+			printed = false;
+		}
+		if (continueCheck == 0) break;
 		if (continueCheck == upload)
 		{
+			server.Send(&isOperating, sizeof(isOperating), 0);
 			if (isOperating == false)
 			{
-				server.Send(&isOperating, sizeof(isOperating), 0);
 				isOperating = true;
 				bool exist = false;
 				server.Receive(&exist, sizeof(exist), 0);
@@ -538,10 +548,11 @@ Loop:
 				server.Send(&exist, sizeof(exist), 0);
 				string temp;
 				temp = temp + User + " download nonexistent file\n";
-				printStringXY(temp.c_str(), 3);
+				if(printed == false) printStringXY(temp.c_str(), 3);
 			}
-			
+
 		}
+		continueCheck = 99;
 	} while (continueCheck != 0);
 	status = 3;
 	strcpy(UserC, User);
