@@ -205,6 +205,7 @@ DWORD WINAPI threadFunction_handle_server_connected(LPVOID arg)
 				printStringXY("-------- Hen gap lai --------\n", 1);
 				client.Close();
 				printStringXY("Nhan ENTER de thoat\n", 1);
+				Sleep(2200);
 				exit(0);
 			}
 
@@ -218,7 +219,7 @@ DWORD WINAPI threadFunction_handle_server_connected(LPVOID arg)
 				UserC[size] = '\0';
 				string temp;
 				temp = temp + UserC + " logged in\n";
-				Sleep(30);
+				Sleep(40);
 				printStringXY(temp.c_str(), 2);
 				gotoxy(x, y);
 				delete[] UserC;
@@ -234,7 +235,7 @@ DWORD WINAPI threadFunction_handle_server_connected(LPVOID arg)
 				UserC[size] = '\0';
 				string temp;
 				temp = temp + UserC + " logged out\n";
-				Sleep(30);
+				Sleep(40);
 				printStringXY(temp.c_str(), 2);
 				gotoxy(x, y);
 				delete[] UserC;

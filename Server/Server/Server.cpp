@@ -323,6 +323,7 @@ DWORD WINAPI threadFunction_stop_key(LPVOID arg)
 		{
 			status = 1;
 			printStringXY("Server is disconnect...\n", 1);
+			system("color 04");
 		}
 	} while (true);
 	return 0;
