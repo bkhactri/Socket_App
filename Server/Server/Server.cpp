@@ -4,7 +4,7 @@
 #include "Server.h"
 #include "afxsock.h"
 #include "math.h"
-#include<conio.h>
+#include <conio.h>
 
 // The one and only application object
 CWinApp theApp;
@@ -13,6 +13,188 @@ using namespace std;
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
+
+const int colWidth = 40;
+const int colHeight = 30;
+
+int x2 = colWidth, y2 = 1, x = 1, y = 1, x3 = 2 * colWidth, y3 = 1;
+
+void gotoxy(int x, int y)
+{
+	static HANDLE h = NULL;
+	if (!h)
+		h = GetStdHandle(STD_OUTPUT_HANDLE);
+	COORD c = { x, y };
+	SetConsoleCursorPosition(h, c);
+}
+
+bool checkPos(int x, int y)
+{
+	if (x == 0 || x == colWidth - 1 || x == 2 * colWidth - 1 || x == 3 * colWidth - 1) return 0;
+	if (y == 0 || y == colHeight - 1) return 0;
+	return 1;
+}
+
+void displayServer()
+{
+	system("color 03");
+	char c;
+	for (size_t i = 0; i < colHeight; i++)
+	{
+		for (size_t j = 0; j < 3 * colWidth; j++)
+		{
+			char c;
+			if (i == 0)
+			{
+				if (j == 0) c = 201;
+				else if (j == 3 * colWidth - 1) c = 187;
+				else if (j == colWidth - 1 || j == 2 * colWidth - 1) c = 203;
+				else c = 205;
+			}
+			else if (i == colHeight - 1)
+			{
+				if (j == 0) c = 200;
+				else if (j == 3 * colWidth - 1) c = 188;
+				else if (j == colWidth - 1 || j == 2 * colWidth - 1) c = 202;
+				else c = 205;
+			}
+			else
+			{
+				if (j == 0 || j == colWidth - 1 || j == 2 * colWidth - 1 || j == 3 * colWidth - 1) c = 186;
+				else c = 32;
+			}
+			cout << c;
+		}
+		cout << endl;
+	}
+}
+
+void clearCol(int colNum)
+{
+	switch (colNum)
+	{
+	case 1:
+		for (int a = 1; a < colHeight - 1; a++)
+		{
+			for (int b = 1; b < colWidth - 1; b++)
+			{
+				gotoxy(b, a);
+				cout << " ";
+			}
+		}
+		break;
+	case 2:
+		for (int a = 1; a < colHeight - 1; a++)
+		{
+			for (int b = colWidth; b < 2 * colWidth - 1; b++)
+			{
+				gotoxy(b, a);
+				cout << " ";
+			}
+		}
+		break;
+	case 3:
+		for (int a = 1; a < colHeight - 1; a++)
+		{
+			for (int b = 2 * colWidth; b < 3 * colWidth - 1; b++)
+			{
+				gotoxy(b, a);
+				cout << " ";
+			}
+		}
+		break;
+	}
+}
+
+void printStringXY(const char* str, int colNum) // colNum la so thu tu cua cot can in
+{
+	int i = 0;
+	switch (colNum)
+	{
+	case 1:
+	{
+		for (i; i < strlen(str); i++)
+		{
+			if (!checkPos(x + 1, y))
+			{
+				if (y < colHeight - 2) y++;
+				else
+				{
+					clearCol(colNum);
+					y = 1;
+				}
+				x = 1;
+			}
+			if (str[i] == '\n')
+			{
+				y++;
+				x = 1;
+			}
+			else
+			{
+				gotoxy(x, y);
+				cout << str[i];
+				x++;
+			}
+		}
+		break;
+	}
+	case 2:
+	{
+		for (i; i < strlen(str); i++)
+		{
+			if (!checkPos(x2 + 1, y2))
+			{
+				if (y2 < colHeight - 2) y2++;
+				else
+				{
+					clearCol(colNum);
+					y2 = 1;
+				}
+				x2 = colWidth;
+			}
+			if (str[i] == '\n')
+			{
+				y2++;
+				x2 = colWidth;
+			}
+			else
+			{
+				gotoxy(x2, y2);
+				cout << str[i];
+				x2++;
+			}
+		}
+		break;
+	}
+	case 3:
+		for (i; i < strlen(str); i++)
+		{
+			if (!checkPos(x3 + 1, y3))
+			{
+				if (y3 < colHeight - 2) y3++;
+				else
+				{
+					clearCol(colNum);
+					y3 = 1;
+				}
+				x3 = 2 * colWidth;
+			}
+			if (str[i] == '\n')
+			{
+				y3++;
+				x3 = 2 * colWidth;
+			}
+			else
+			{
+				gotoxy(x3, y3);
+				cout << str[i];
+				x3++;
+			}
+		}
+		break;
+	}
+}
 
 int fileSize(char* path) {
 	ifstream f(path, ios::binary);
@@ -125,10 +307,10 @@ DWORD WINAPI threadFunction_send_flag(LPVOID arg)
 			status = 0;
 		}
 	} while (flag != 1);
-
-	exit(0);
 	cin.clear();
 	cin.ignore();
+	exit(0);
+	
 	return 0;
 }
 
@@ -139,7 +321,7 @@ DWORD WINAPI threadFunction_stop_key(LPVOID arg)
 		if (handleClose() == 1)
 		{
 			status = 1;
-			cout << "Server da ngat ket noi" << endl;
+			printStringXY("Server is disconnect...\n", 1);
 		}
 	} while (true);
 	return 0;
@@ -213,7 +395,9 @@ Loop:
 			if ((choice == 1 && Check(Password, C2) == 1))
 			{
 				correct = 1;
-				cout << User << " da dang nhap" << endl;
+				string temp;
+				temp = temp + User + " logged in\n";
+				printStringXY(temp.c_str(), 2);
 				status = 2;
 				strcpy(UserC, User);
 				LogStatus = 1;
@@ -234,7 +418,9 @@ Loop:
 	}
 	else if (correct == 0 && choice == 2)
 	{
-		cout << User << " da tao tai khoan thanh cong" << endl;
+		string temp;
+		temp = temp + User + " has been created\n";
+		printStringXY(temp.c_str(), 2);
 		LogStatus = 1;
 		f.open("User.bin", ios::app);
 		if (f.fail()) { return 0; }
@@ -252,19 +438,19 @@ Loop:
 	{
 		//Nhan check value xem client co tiep tuc hay khong
 		server.Receive((char*)&continueCheck, sizeof(int), 0);
-		server.Send(&isOperating, sizeof(isOperating), 0);
-		if (isOperating == false)
+		
+		if (continueCheck == upload)
 		{
-			isOperating = true;
-			if (continueCheck == upload)
+			if (isOperating == false)
 			{
+				server.Send(&isOperating, sizeof(isOperating), 0);
 				isOperating = true;
 				bool exist = false;
 				server.Receive(&exist, sizeof(exist), 0);
 				if (exist == true)
 				{
-					char fileName[100];
-					char path[100] = "Database/";
+					char fileName[50];
+					char path[50] = "Database/";
 					int length = 0;
 					// tao path "Database/fileName"
 					server.Receive(&length, sizeof(length), 0);
@@ -276,87 +462,98 @@ Loop:
 					strcat_s(path, fileName);
 
 					// fstream cua file duoc upload
-					fstream output;
-					output.open(path, ios::out | ios::binary);
+					ofstream f;
+					f.open(path, ios::out | ios::binary);
 					int buffLength = 0; // do dai doan bin moi lan gui
-					server.Receive((char*)&buffLength, sizeof(int), 0);
-					char* buff = new char[buffLength + 1];
-					server.Receive((char*)buff, buffLength, 0);
-					buff[buffLength] = '\0';
-					output.write(buff, buffLength);
+					char* buff = new char[1 + 1];
+					while (true) {
+						server.Receive((char*)&buffLength, sizeof(int), 0);
+						if (buffLength == 0) break;
+						server.Receive((char*)buff, buffLength, 0);
+						f.write(buff, buffLength);
+					}
 					delete[] buff;
-					output.close();
-					cout << "File " << fileName << " da duoc " << User << " upload len Database.\n";
+					buff = NULL;
+					f.close();
+					string temp;
+					temp = temp + "File " + fileName + " is uploaded to Database by " + User + "\n";
+					printStringXY(temp.c_str(), 3);
 				}
+				isOperating = false;
 			}
-			else if (continueCheck == download)
+		}
+		else if (continueCheck == download)
+		{
+			DIR* pDIR;
+			struct dirent* entry;
+			if (pDIR = opendir(databasePath))
 			{
-				DIR* pDIR;
-				struct dirent* entry;
-				if (pDIR = opendir(databasePath))
+				while (entry = readdir(pDIR))
 				{
-					while (entry = readdir(pDIR))
+					if (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0)
 					{
-						if (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0)
-						{
-							server.Send(&(entry->d_namlen), sizeof(int), 0);
-							server.Send(&(entry->d_name), entry->d_namlen, 0);
-						}
+						server.Send(&(entry->d_namlen), sizeof(int), 0);
+						server.Send(&(entry->d_name), entry->d_namlen, 0);
 					}
-					int zero = 0; // thoat vong lap ben phia client
-					server.Send(&zero, sizeof(zero), 0);
-					closedir(pDIR);
 				}
-				char path[100] = "Database/";
-				char fileName[100];
-				int nameLength = 0;
-				server.Receive((char*)&nameLength, sizeof(nameLength), 0);
-				server.Receive((char*)fileName, nameLength, 0);
-				fileName[nameLength] = '\0';
-				strcat_s(path, fileName);
+				int zero = 0; // thoat vong lap ben phia client
+				server.Send(&zero, sizeof(zero), 0);
+				closedir(pDIR);
+			}
+			char path[50] = "Database/";
+			char fileName[50];
+			int nameLength = 0;
+			server.Receive((char*)&nameLength, sizeof(nameLength), 0);
+			server.Receive((char*)fileName, nameLength, 0);
+			fileName[nameLength] = '\0';
+			strcat_s(path, fileName);
 
-				ifstream f;
-				bool exist = false;
-				f.open(path, ios::in | ios::binary);
-				if (f.good())
-				{
-					exist = true;
-					server.Send(&exist, sizeof(exist), 0);
-					char* buff = new char[max_file_size + 1];
-					for (int i = 0; i < max_file_size; i++) {
-						buff[i] = '\0';
-					}
-					int buffLength = 0;
-					f.read((char*)buff, max_file_size);
+			ifstream f;
+			bool exist = false;
+			f.open(path, ios::in | ios::binary);
+			if (f.good())
+			{
+				exist = true;
+				server.Send(&exist, sizeof(exist), 0);
+				int buffLength = 0;
+				char* buff = new char[1 + 1];
+				while (!f.eof()) {
+					f.read((char*)buff, 1);
 					buffLength = f.gcount();
 					buff[buffLength] = '\0';
+					cout << "";
 					server.Send(&buffLength, sizeof(buffLength), 0);
 					server.Send(buff, buffLength, 0);
-					delete[] buff;
-					cout << User << " da tai file " << fileName << endl;
-					f.seekg(0, ios::beg);
 				}
-				else
-				{
-					server.Send(&exist, sizeof(exist), 0);
-					cout << User << " donwnload file khong ton tai" << endl;
-				}
+				buffLength = 0;
+				delete[] buff;
+				buff = NULL;
+				string temp;
+				temp = temp + User + " has downloaded " + fileName + "\n";
+				printStringXY(temp.c_str(), 3);
 				f.close();
+			}
+			else
+			{
+				server.Send(&exist, sizeof(exist), 0);
+				string temp;
+				temp = temp + User + " download nonexistent file\n";
+				printStringXY(temp.c_str(), 3);
 			}
 			
 		}
-		continueCheck = 99;
-		isOperating = false;
 	} while (continueCheck != 0);
 	status = 3;
 	strcpy(UserC, User);
 	if (LogStatus == 0)
 	{
-		cout << "Unknown client da dang xuat" << endl;
+		printStringXY("Unknown client has exited\n", 2);
 	}
 	else if (LogStatus == 1)
 	{
-		cout << User << " da dang xuat" << endl;
+		string temp;
+		temp = temp + User + " has logged out\n";
+		printStringXY(temp.c_str(), 2);
 	}
 	delete hConnected;
 	return 0;
@@ -366,6 +563,7 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 {
 	long long int i = 1;
 	int nRetCode = 0;
+	displayServer();
 	DWORD threadID1, threadID2, threadID3;
 	HANDLE threadClient, threadStopEachClient, threadStop;
 	HMODULE hModule = ::GetModuleHandle(NULL);
@@ -386,14 +584,16 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 			server.Create(port);
 
 			//Khoi tao thread de nam bat su kien server bi van de
-			cout << "Nhan ESC de release moi Client va tat Server" << endl;
+			printStringXY("Press ESC to shut down server\n", 1);
 			threadStop = CreateThread(NULL, 0, threadFunction_stop_key, NULL, 0, &threadID3);
 			threadStopEachClient = CreateThread(NULL, 0, threadFunction_stop_each_client, NULL, 0, &threadID2);
 			do
 			{
 				//threadStopEachClient = CreateThread(NULL, 0, threadFunction_stop_each_client, NULL, 0, &threadID2);
 				Sleep(15);
-				cout << "S" << "[" << i << "]" << ": Server lang nghe ket noi tu client" << endl;
+				string temp;
+				temp = temp + "S" + "[" + to_string(i) + "]" + ": Server is listening...\n";
+				printStringXY(temp.c_str(), 1);
 				server.Listen();
 				server.Accept(joiner);
 				//Khoi tao con tro Socket
