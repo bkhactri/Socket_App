@@ -291,9 +291,10 @@ Loop:
 					ofstream f;
 					f.open(path, ios::out | ios::binary);
 					int buffLength = 0; // do dai doan bin moi lan gui
-					char* buff = new char[1024 + 1];
+					char* buff = new char[1 + 1];
 					while (true) {
 						server.Receive((char*)&buffLength, sizeof(int), 0);
+						cout << "";
 						if (buffLength == 0) break;
 						server.Receive((char*)buff, buffLength, 0);
 						f.write(buff, buffLength);
@@ -351,8 +352,7 @@ Loop:
 					server.Send(&buffLength, sizeof(buffLength), 0);
 					server.Send(buff, buffLength, 0);
 				}
-				buffLength = 0;
-				server.Send(&buffLength, sizeof(buffLength), 0);
+			
 				delete[] buff;
 				buff = NULL;
 				string temp;

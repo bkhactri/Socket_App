@@ -222,7 +222,7 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 				}
 
 			Continue:
-				printStringXY("Client connects to server\n", 1);
+				printStringXY("Client connected to server\n", 1);
 				Sleep(2000);
 				clearCol(1);
 
@@ -230,9 +230,9 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 				{
 
 					printStringXY("Please select task\n", 1);
-					printStringXY("1.Upload file to server\n", 1);
-					printStringXY("2.Download file from server\n", 1);
-					printStringXY("0.Exit\n", 1);
+					printStringXY("1. Upload file to server\n", 1);
+					printStringXY("2. Download file from server\n", 1);
+					printStringXY("0. Exit\n", 1);
 					printStringXY("Your Choice: ", 1);
 					cin >> continueCheck;
 					printStringXY("\n", 1);
@@ -268,16 +268,15 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 									client.Send(&length, sizeof(length), 0);
 									client.Send(fileName, length, 0);
 									int buffLength = 0;
-									char* buff = new char[1024 + 1];
+									char* buff = new char[1 + 1];
 									while (!f.eof()) {
-										f.read((char*)buff, 1024);
+										f.read((char*)buff, 1);
 										buffLength = f.gcount();
 										cout << "";
 										client.Send(&buffLength, sizeof(buffLength), 0);
 										client.Send(buff, buffLength, 0);
 									}
 									buffLength = 0;
-									client.Send(&buffLength, sizeof(buffLength), 0);
 									delete[] buff;
 									buff = NULL;
 									string temp;
@@ -341,9 +340,10 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 							char* buff = new char[1 + 1];
 							while (true) {
 								client.Receive((char*)&buffLength, sizeof(int), 0);
+								cout << "";
 								if (buffLength == 0) break;
 								client.Receive((char*)buff, buffLength, 0);
-								buff[buffLength] = '\0';
+
 								output.write(buff, buffLength);
 							}
 							delete[] buff;
