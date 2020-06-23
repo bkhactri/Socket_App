@@ -4,7 +4,6 @@
 #include "stdafx.h"
 #include "Client.h"
 #include "afxsock.h"
-#include <conio.h>
 // The one and only application object
 
 CWinApp theApp;
@@ -15,164 +14,7 @@ using namespace std;
 #define new DEBUG_NEW
 #endif
 
-const int colWidth = 60;
-const int colHeight = 30;
-
-int x3 = 2 * colWidth, y3 = 1, x2 = colWidth, y2 = 1, x = 1, y = 1;
-
-void gotoxy(int x, int y)
-{
-	static HANDLE h = NULL;
-	if (!h)
-		h = GetStdHandle(STD_OUTPUT_HANDLE);
-	COORD c = { x, y };
-	SetConsoleCursorPosition(h, c);
-}
-
-bool checkPos(int x, int y)
-{
-	if (x == 0 || x == colWidth - 1 || x == 2 * colWidth - 1) return 0;
-	if (y == 0 || y == colHeight - 1) return 0;
-	return 1;
-}
-
-void displayClient()
-{
-	system("color 0A");
-	char c;
-	for (size_t i = 0; i < colHeight; i++)
-	{
-		for (size_t j = 0; j < 2 * colWidth; j++)
-		{
-			char c;
-			if (i == 0)
-			{
-				if (j == 0) c = 201;
-				else if (j == 2 * colWidth - 1) c = 187;
-				else if (j == colWidth - 1) c = 203;
-				else c = 205;
-			}
-			else if (i == colHeight - 1)
-			{
-				if (j == 0) c = 200;
-				else if (j == 2 * colWidth - 1) c = 188;
-				else if (j == colWidth - 1) c = 202;
-				else c = 205;
-			}
-			else
-			{
-				if (j == 0 || j == 2 * colWidth - 1 || j == colWidth - 1) c = 186;
-				else c = 32;
-			}
-			cout << c;
-		}
-		cout << endl;
-	}
-}
-
-void clearCol(int colNum)
-{
-	switch (colNum)
-	{
-	case 1:
-		for (int a = 1; a < colHeight - 1; a++)
-		{
-			for (int b = 1; b < colWidth - 1; b++)
-			{
-				gotoxy(b, a);
-				cout << " ";
-			}
-		}
-		x = 1; y = 1;
-		break;
-	case 2:
-		for (int a = 1; a < colHeight - 1; a++)
-		{
-			for (int b = colWidth; b < 2 * colWidth - 1; b++)
-			{
-				gotoxy(b, a);
-				cout << " ";
-			}
-		}
-		x2 = colWidth; y2 = 1;
-		break;
-	case 3:
-		for (int a = 1; a < colHeight - 1; a++)
-		{
-			for (int b = 2 * colWidth; b < 3 * colWidth - 1; b++)
-			{
-				gotoxy(b, a);
-				cout << " ";
-			}
-		}
-		x3 = 2 * colWidth; y3 = 1;
-		break;
-	}
-}
-
-void printStringXY(const char* str, int colNum) // colNum la so thu tu cua cot can in
-{
-	int i = 0;
-	switch (colNum)
-	{
-	case 1:
-	{
-		for (i; i < strlen(str); i++)
-		{
-			if (!checkPos(x + 1, y))
-			{
-				if (y < colHeight - 2) y++;
-				else
-				{
-					clearCol(colNum);
-					y = 1;
-				}
-				x = 1;
-			}
-			if (str[i] == '\n')
-			{
-				y++;
-				x = 1;
-			}
-			else
-			{
-				gotoxy(x, y);
-				cout << str[i];
-				x++;
-			}
-		}
-		break;
-	}
-	case 2:
-	{
-		for (i; i < strlen(str); i++)
-		{
-			if (!checkPos(x2 + 1, y2))
-			{
-				if (y2 < colHeight - 2) y2++;
-				else
-				{
-					clearCol(colNum);
-					y2 = 1;
-				}
-				x2 = colWidth;
-			}
-			if (str[i] == '\n')
-			{
-				y2++;
-				x2 = colWidth;
-			}
-			else
-			{
-				gotoxy(x2, y2);
-				cout << str[i];
-				x2++;
-			}
-		}
-		break;
-	}
-	}
-}
+char sAdd[1000];
 
 int fileSize(char* path) {
 	ifstream f(path, ios::binary);
@@ -184,7 +26,7 @@ int fileSize(char* path) {
 }
 
 
-DWORD WINAPI threadFunction_handle_server_connected(LPVOID arg)
+DWORD WINAPI threadFunction_handle_server_connected(LPVOID arg) //Da tieu trinh xu ly nhan biet ket noi server
 {
 	unsigned int port1 = 1235;
 	int flag = 0;
@@ -199,17 +41,24 @@ DWORD WINAPI threadFunction_handle_server_connected(LPVOID arg)
 		do
 		{
 			client.Receive((char*)&flag, sizeof(int), 0);
-			if (flag == 1 || flag == 0)
+			if (flag == 1 || flag == 0) //co cho biet server da sap
 			{
-				printStringXY("\n-- Server da gap loi hoac Server da tat --\n", 1);
-				printStringXY("-------- Hen gap lai --------\n", 1);
+				if (flag == 1)
+				{
+					printStringXY("\n------------ Server is shut down ---------------------\n", 1);
+				}
+				else if (flag == 0)
+				{
+					printStringXY("\n------------ Server ran into the problem ------------\n", 1);
+				}
+				printStringXY("############## Sorry and See you again ##############\n", 1);
 				client.Close();
-				printStringXY("Nhan ENTER de thoat\n", 1);
+				printStringXY("Client is exiting securely\n", 1);
 				Sleep(2200);
 				exit(0);
 			}
 
-			else if (flag == 2)
+			else if (flag == 2) //co cho biet thong tin user khac dang nhap
 			{
 				//Nhan kich thuoc tai khoan tu client
 				client.Receive((char*)&size, sizeof(int), 0); // Neu nhan loi thi tra ve la SOCKET_ERROR.
@@ -225,7 +74,7 @@ DWORD WINAPI threadFunction_handle_server_connected(LPVOID arg)
 				delete[] UserC;
 				flag = 0;
 			}
-			else if (flag == 3)
+			else if (flag == 3) // co cho biet thong tin user khac dang xuat
 			{
 				//Nhan kich thuoc tai khoan tu client
 				client.Receive((char*)&size, sizeof(int), 0); // Neu nhan loi thi tra ve la SOCKET_ERROR.
@@ -276,7 +125,7 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 			client.Create();
 
 			// Nhap dia chi IP cua server
-			printStringXY("Nhap dia chi IP cua server: ", 1);
+			printStringXY("IP server: ", 1);
 			gets_s(sAdd);
 			printStringXY("\n", 1);
 
@@ -289,9 +138,9 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 				char Password[100];
 				int Usize, Psize;
 			Login:
-				printStringXY("1.Dang nhap\n", 1);
-				printStringXY("2.Tao tai khoan\n", 1);
-				printStringXY("Lua chon cua ban: ", 1);
+				printStringXY("1. Log in\n", 1);
+				printStringXY("2. Create account\n", 1);
+				printStringXY("Your choice: ", 1);
 				cin >> choice;
 				printStringXY("\n", 1);
 
@@ -307,11 +156,11 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 				if (choice == 1)
 				{
 				Loop:
-					printStringXY("Nhap vao tai khoan: ", 1);
+					printStringXY("Username: ", 1);
 					cin.getline(User, 100);
 					printStringXY("\n", 1);
 
-					printStringXY("Nhap vao mat khau: ", 1);
+					printStringXY("Password: ", 1);
 					cin.getline(Password, 100);
 					printStringXY("\n", 1);
 
@@ -347,12 +196,12 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 			Choice1:
 				if (correct == 1)
 				{
-					printStringXY("Tai khoan mat khau da duoc server xac nhan\n", 1);
+					printStringXY("Your username and password is verified\n", 1);
 					goto Continue;
 				}
 				else if (correct == 0)
 				{
-					printStringXY("Tai khoan mat khau ban nhap khong dung vui long thu lai\n", 1);
+					printStringXY("Username or password is not correct\n", 1);
 					Sleep(2000);
 					clearCol(1);
 					goto Loop;
@@ -361,30 +210,30 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 			Choice2:
 				if (correct == 0)
 				{
-					printStringXY("Tai khoan da duoc tao thanh cong\n", 1);
+					printStringXY("Account has been created successfully\n", 1);
 					goto Continue;
 				}
 				else if (correct == 1)
 				{
-					printStringXY("Tai khoan da duoc su dung vui long nhap khac\n", 1);
+					printStringXY("Username is already in use. Enter the new one\n", 1);
 					Sleep(2000);
 					clearCol(1);
 					goto Loop;
 				}
 
 			Continue:
-				printStringXY("Client da ket noi toi server\n", 1);
+				printStringXY("Client connects to server\n", 1);
 				Sleep(2000);
 				clearCol(1);
 
 				do
 				{
 
-					printStringXY("Moi lua chon tac vu\n", 1);
-					printStringXY("1.Upload file len server\n", 1);
-					printStringXY("2.Download file tu server\n", 1);
-					printStringXY("0.Thoat\n", 1);
-					printStringXY("Choice: ", 1);
+					printStringXY("Please select task\n", 1);
+					printStringXY("1.Upload file to server\n", 1);
+					printStringXY("2.Download file from server\n", 1);
+					printStringXY("0.Exit\n", 1);
+					printStringXY("Your Choice: ", 1);
 					cin >> continueCheck;
 					printStringXY("\n", 1);
 
@@ -395,11 +244,11 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 						client.Receive(&isServerOperating, sizeof(isServerOperating), 0);
 						if (isServerOperating == true)
 						{
-							printStringXY("\nServer dang ban, hay thu hien thao tac sau.\n", 1);
+							printStringXY("\nServer is busy. Please try again later\n", 1);
 						}
 						else
 						{
-							printStringXY("\nNhap ten file muon upload: ", 1);
+							printStringXY("\nName of the file you want to upload: ", 1);
 							char fileName[100];
 							cin.ignore();
 							cin.getline(fileName, 100);
@@ -419,42 +268,44 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 									client.Send(&length, sizeof(length), 0);
 									client.Send(fileName, length, 0);
 									int buffLength = 0;
-									char* buff = new char[1 + 1];
+									char* buff = new char[1024 + 1];
 									while (!f.eof()) {
-										f.read((char*)buff, 1);
+										f.read((char*)buff, 1024);
 										buffLength = f.gcount();
 										cout << "";
 										client.Send(&buffLength, sizeof(buffLength), 0);
 										client.Send(buff, buffLength, 0);
 									}
+									buffLength = 0;
+									client.Send(&buffLength, sizeof(buffLength), 0);
 									delete[] buff;
 									buff = NULL;
 									string temp;
-									temp = temp + "File " + fileName + " da duoc upload len server.\n";
+									temp = temp + "File " + fileName + " is uploaded to server.\n";
 									printStringXY(temp.c_str(), 1);
 								}
 								else
 								{
 									string temp;
-									temp = temp + "File " + fileName + " khong duoc upload len server do dung luong vuot qua 200MB.\n";
+									temp = temp + "File " + fileName + " can't upload to server because size of it is bigger than 200MB.\n";
 									printStringXY(temp.c_str(), 1);
 									string tmp = to_string(double(s) / (pow(1024, 2.0)));
 									string temp2;
-									temp2 = temp2 + "Dung luong thuc te cua file " + tmp + "MB\n";
+									temp2 = temp2 + "Actual size of file: " + tmp + "MB\n";
 									printStringXY(temp2.c_str(), 1);
 								}
 							}
 							else
 							{
 								client.Send(&exist, sizeof(exist), 0);
-								printStringXY("\nKhong ton tai ten file.\n", 1);
+								printStringXY("\nFile doesn't exist.\n", 1);
 							}
 							f.close();
 						}
 					}
 					else if (continueCheck == download)
 					{
-						printStringXY("Danh sach file ton tai tren database cua server:\n", 1);
+						printStringXY("List file on Database:\n", 1);
 						char fileName[50];
 						int nameLength = 0;
 						while (true)
@@ -470,7 +321,7 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 								printStringXY(temp.c_str(), 1);
 							}
 						}
-						printStringXY("\nNhap ten file muon download: ", 1);
+						printStringXY("\nName of the file you want to download: ", 1);
 						cin.ignore();
 						cin.getline(fileName, 100);
 						printStringXY("\n", 1);
@@ -490,7 +341,6 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 							char* buff = new char[1 + 1];
 							while (true) {
 								client.Receive((char*)&buffLength, sizeof(int), 0);
-								cout << "";
 								if (buffLength == 0) break;
 								client.Receive((char*)buff, buffLength, 0);
 								buff[buffLength] = '\0';
@@ -499,11 +349,11 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 							delete[] buff;
 							buff = NULL;
 							output.close();
-							printStringXY("Da download file thanh cong.\n", 1);
+							printStringXY("File has been downloaded successfully.\n", 1);
 						}
 						else
 						{
-							printStringXY("Khong ton tai file tren server.\n", 1);
+							printStringXY("File doesn't exist on server Database.\n", 1);
 						}
 					}
 					Sleep(2000);
@@ -514,7 +364,7 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 			}
 			else
 			{
-				printStringXY("Khong connect duoc toi server....\n", 1);
+				printStringXY("Can't connect to the server....\n", 1);
 			}
 		}
 	}
