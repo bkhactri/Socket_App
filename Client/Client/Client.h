@@ -12,7 +12,7 @@ using namespace std;
 const int colWidth = 60;
 const int colHeight = 30;
 
-static int x3 = 2 * colWidth, y3 = 1, x2 = colWidth, y2 = 1, x = 1, y = 1;
+int x3 = 2 * colWidth, y3 = 1, x2 = colWidth, y2 = 1, x = 1, y = 1;
 
 #define port 1234
 #define upload 1
